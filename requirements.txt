@@ -1,0 +1,13 @@
+fastapi
+joblib
+kagglehub
+matplotlib
+numpy
+pandas
+pydantic
+scikit-learn
+scipy
+sdv
+seaborn
+shap
+uvicorn

@@ -1,0 +1,5 @@
+frontend/node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+/Users/rudra/Documents/Hackathons/Priceton/trialforge/frontend/.env
