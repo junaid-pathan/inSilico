@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioTrace - BioDigital Integration</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0d1117; /* Dark mode aesthetic */
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #58a6ff;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .chat-panel {
+            flex: 1;
+            background: #161b22;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+        }
+        .visual-panel {
+            flex: 2;
+            background: #161b22;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            overflow: hidden;
+            height: 600px;
+            position: relative;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        button {
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2ea043;
+        }
+        .log {
+            margin-top: 15px;
+            padding: 10px;
+            background: #0d1117;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #8b949e;
+        }
+    </style>
+    <!-- Include the BioDigital Human API -->
+    <script src="https://developer.biodigital.com/builds/api/2/human-api.min.js"></script>
+</head>
+<body>
+
+    <h1>BioTrace: Bio-Visual Mapping</h1>
+    
+    <div class="container">
+        <!-- Chat / Agent Panel -->
+        <div class="chat-panel">
+            <h3>Orchestrator Feed</h3>
+            <p>Simulate an action signal coming from the K2 Reasoning Engine.</p>
+            
+            <div class="log" id="event-log">Waiting for K2 output...</div>
+
+            <!-- Trigger Button -->
+            <button onclick="simulateK2Trigger()">Trigger 'Peripheral Edema' View</button>
+        </div>
+
+        <!-- 3D Visualization Panel -->
+        <div class="visual-panel">
+            <!-- Example starting model: standard full body -->
+            <iframe 
+                id="biodigital-iframe"
+                src="https://human.biodigital.com/viewer/?id=production/maleAdult/male_region_full_body_15&ui-info=false&ui-menu=false" 
+                allowfullscreen="true"
+            ></iframe>
+        </div>
+    </div>
+
+    <script>
+        // 1. Initialize the BioDigital API
+        let human = new HumanAPI('biodigital-iframe');
+
+        human.on('human.ready', function() {
+            logEvent("BioDigital Engine Ready.");
+        });
+
+        // 2. Map Action Signals to BioDigital logic
+        function simulateK2Trigger() {
+            logEvent("Received: TRIGGER_BIODIGITAL_EDEMA_VIEW");
+            
+            // In a real hackathon, we would trigger an animation or jump to a specific 
+            // chapter/bookmark in the BioDigital model that shows leg swelling or the lymphatic system.
+            
+            // Here, we simulate changing the view by triggering a camera fly-to 
+            // and highlighting the lower extremities (simulating edema).
+            
+            logEvent("Executing API Call: Highlighting Lower Extremities...");
+            
+            // Example BioDigital API Calls (Mocking the behavior)
+            // Select the lower leg objects (IDs would be specific to the loaded model)
+            // human.send('scene.selectObjects', { objectIds: ['lower_leg_left', 'lower_leg_right'] });
+            
+            // Zoom the camera to the selected objects
+            // human.send('camera.set', { target: { objectIds: ['lower_leg_left'] }, animate: true });
+            
+            // Since we don't have exact object IDs for this mock model, 
+            // we'll update the iframe src to simulate loading a specific "Edema" or leg-focused widget.
+            document.getElementById('biodigital-iframe').src = "https://human.biodigital.com/viewer/?id=production/maleAdult/lower_extremity_anatomy&ui-info=false";
+            
+            logEvent("View Updated: Showing Lower Extremity Anatomy.");
+        }
+
+        function logEvent(message) {
+            const logDiv = document.getElementById('event-log');
+            logDiv.innerHTML += `<br/>> ${message}`;
+        }
+    </script>
+</body>
+</html>
