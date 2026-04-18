@@ -14,9 +14,10 @@ class K2ReasoningEngine:
         self.api_key = api_key or os.getenv("K2_API_KEY", "mock_key_for_hackathon")
         self.endpoint = endpoint
         
-    def generate_conflict_analysis_prompt(self, protocol_snippet, patient_lifestyle, risk_attributions):
+    def generate_conflict_analysis_prompt(self, protocol_snippet, patient_lifestyle, risk_attributions, twin_profile=None):
         """
-        Creates the specialized prompt for K2 to perform comparative conflict analysis.
+        Creates the specialized prompt for K2 to perform comparative conflict analysis,
+        now enhanced with Predictive Digital Twin data from the Artificial Control Group.
         """
         prompt = f"""
         [ROLE]
@@ -33,6 +34,7 @@ class K2ReasoningEngine:
         - Trial Protocol Snippet: "{protocol_snippet}"
         - Patient's Planned Activity/Lifestyle: "{patient_lifestyle}"
         - Saliency/Attribution Tokens Triggering Warning: {json.dumps(risk_attributions)}
+        - Predictive Digital Twin Risks (from Synthetic Cohort): {json.dumps(twin_profile) if twin_profile else "None provided"}
 
         [OUTPUT FORMAT REQUIRED (JSON)]
         {{
@@ -45,11 +47,11 @@ class K2ReasoningEngine:
         """
         return prompt
 
-    def run_analysis(self, protocol_snippet, patient_lifestyle, risk_attributions):
+    def run_analysis(self, protocol_snippet, patient_lifestyle, risk_attributions, twin_profile=None):
         """
         Executes the reasoning call to K2.
         """
-        prompt = self.generate_conflict_analysis_prompt(protocol_snippet, patient_lifestyle, risk_attributions)
+        prompt = self.generate_conflict_analysis_prompt(protocol_snippet, patient_lifestyle, risk_attributions, twin_profile)
         
         print("Sending Comparative Conflict Analysis prompt to K2 (70B)...")
         # --- MOCK API CALL for Hackathon logic ---
@@ -62,7 +64,7 @@ class K2ReasoningEngine:
             "conflict_detected": True,
             "conflict_summary": "Intense exercise may exacerbate fluid retention and swelling associated with the subcutaneous injection.",
             "protocol_reference": "experience localized swelling, fluid retention, and subsequent peripheral edema",
-            "patient_message": "Hi there! I noticed you're planning a heavy gym session tomorrow. Because your recent Regeneron injection can cause 'peripheral edema' (which is medical jargon for fluid retention and swelling in your legs), hitting the gym hard right now might make that swelling worse, specifically in your calf muscles. Let's stick to a light walk instead to be safe!",
+            "patient_message": "Hi there! I noticed you're planning a heavy gym session tomorrow. Because your recent Regeneron injection can cause 'peripheral edema' (which is medical jargon for fluid retention and swelling in your legs), hitting the gym hard right now might make that swelling worse, specifically in your calf muscles. Also, based on data from our predictive models of patients similar to you, we noticed a high risk of this occurring in week 2. Let's stick to a light walk instead to be safe!",
             "action_signals": ["TRIGGER_BIODIGITAL_SEARCH", "UPDATE_CALENDAR_REST_DAY"],
             "target_anatomy": "gastrocnemius" # AI dynamically identifies the exact muscle/organ
         }
@@ -88,7 +90,12 @@ if __name__ == "__main__":
     print("\n--- K2 Think V2 Reasoning Engine ---")
     print(f"Patient Intent: {lifestyle}")
     
-    result = engine.run_analysis(protocol, lifestyle, high_weight_tokens)
+    # Mock Twin Profile
+    mock_twin = {
+        "predicted_adverse_events": [{"condition": "peripheral edema", "probability": 60, "timeline_trigger": "Week 2"}]
+    }
+    
+    result = engine.run_analysis(protocol, lifestyle, high_weight_tokens, mock_twin)
     
     print("\n--- K2 Output (Logic Gates & Patient Comms) ---")
     print(json.dumps(result, indent=2))

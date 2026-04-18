@@ -1,5 +1,6 @@
 import json
 import time
+from synthetic_twin_engine import SyntheticTwinEngine
 
 class PrivacyAgent:
     """
@@ -42,8 +43,9 @@ class MedicalAgent:
         self.patient_id = "PATIENT_84729"
         self.protocol_snippet = "Patients receiving the subcutaneous injection may experience localized swelling, fluid retention, and subsequent peripheral edema in the lower extremities. Strenuous physical activity should be avoided for 48 hours post-injection."
         
-    def process_lifestyle_check(self, anonymized_lifestyle_string, k2_engine, attribution_engine):
+    def process_lifestyle_check(self, anonymized_lifestyle_string, twin_profile, k2_engine, attribution_engine):
         print(f"[Medical Agent] Analyzing anonymized lifestyle data for {self.patient_id}...")
+        print(f"[Medical Agent] Integrated Digital Twin Profile Risks: {twin_profile['predicted_adverse_events']}")
         
         # 1. Get Attributions
         saliency_data = attribution_engine.generate_saliency_map(self.protocol_snippet)
@@ -53,7 +55,8 @@ class MedicalAgent:
         k2_results = k2_engine.run_analysis(
             self.protocol_snippet, 
             anonymized_lifestyle_string, 
-            top_tokens
+            top_tokens,
+            twin_profile
         )
         
         return k2_results
@@ -68,6 +71,7 @@ class DedalusOrchestrator:
     def __init__(self, privacy_agent, medical_agent):
         self.privacy_agent = privacy_agent
         self.medical_agent = medical_agent
+        self.twin_engine = SyntheticTwinEngine()
         
     def run_daily_sync(self, k2_engine, attribution_engine):
         print("\n=== STARTING DAILY DEDALUS SYNC ===")
@@ -79,9 +83,16 @@ class DedalusOrchestrator:
         
         print(f"[Orchestrator] Stripped PII. Passing lifestyle data to Medical Agent.")
         
-        # STEP 2: Medical Agent analyzes it using AI stack
+        # STEP 2: Orchestrator Generates Digital Twin
+        print(f"[Orchestrator] Generating Predictive Digital Twin from Artificial Control Group...")
+        # Assume privacy_agent provides basic demographic data stripped of direct identifiers
+        patient_demographics = {"age": 68, "sex": "F"} 
+        twin_profile = self.twin_engine.generate_patient_twin_profile(patient_demographics)
+        
+        # STEP 3: Medical Agent analyzes it using AI stack
         analysis_result = self.medical_agent.process_lifestyle_check(
             anonymized_activity, 
+            twin_profile,
             k2_engine, 
             attribution_engine
         )

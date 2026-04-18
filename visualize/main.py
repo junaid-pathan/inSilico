@@ -72,11 +72,16 @@ async def register_trial(data: ProtocolUpload):
     # Manim saves to this specific path structure
     video_url = "http://127.0.0.1:8000/media/videos/timeline_animator/480p15/TrialTimeline.mp4"
     
+    # Generate twin profile to return to frontend on register
+    patient_demographics = {"age": 68, "sex": "F"} 
+    twin_profile = firewall.twin_engine.generate_patient_twin_profile(patient_demographics)
+    
     return {
         "status": "success", 
         "message": "Trial registered and flowchart generated.",
         "video_url": video_url,
-        "calendar_connected": True
+        "calendar_connected": True,
+        "twin_profile": twin_profile
     }
 
 @app.post("/api/analyze-lifestyle")
@@ -92,13 +97,20 @@ async def analyze_lifestyle(data: PatientInput):
     # 2. Extract just the anonymized string from the PII container
     anonymized_activity = data.activity # Stripping out names/dates happens here conceptually
     
-    # 3. Medical Agent processes the clinical side
-    print(f"[API Endpoint] Routing anonymized data through the firewall to Medical Agent...")
+    # 3. Get Twin Profile and Medical Agent processes the clinical side
+    print(f"[API Endpoint] Generating twin profile and routing to Medical Agent...")
+    patient_demographics = {"age": 68, "sex": "F"} 
+    twin_profile = firewall.twin_engine.generate_patient_twin_profile(patient_demographics)
+    
     analysis_result = medical_agent.process_lifestyle_check(
         anonymized_activity, 
+        twin_profile,
         k2_engine, 
         attr_engine
     )
+    
+    # Add twin profile to result so frontend can show it
+    analysis_result["twin_profile"] = twin_profile
     
     # 4. If a conflict is found, we process the action signals
     if analysis_result.get("conflict_detected"):

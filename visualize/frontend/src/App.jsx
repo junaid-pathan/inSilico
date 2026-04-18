@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import LandingPage from './LandingPage';
 import './App.css';
 
 function App() {
@@ -6,6 +7,7 @@ function App() {
   const [protocolText, setProtocolText] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
+  const [twinProfile, setTwinProfile] = useState(null);
   
   const [messages, setMessages] = useState([
     {
@@ -20,29 +22,33 @@ function App() {
   const [bioUrl, setBioUrl] = useState(BASE_BIO_URL);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = async () => {
+  const handleRegister = async (textToRegister) => {
     setIsRegistering(true);
+    let success = false;
     try {
       const response = await fetch('http://127.0.0.1:8000/api/register-trial', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ protocol_text: protocolText })
+        body: JSON.stringify({ protocol_text: textToRegister })
       });
       const data = await response.json();
       if (data.status === 'success') {
         setVideoUrl(data.video_url);
         setIsRegistered(true);
+        if (data.twin_profile) setTwinProfile(data.twin_profile);
         // Add calendar sync message
         setMessages(prev => [...prev, {
            id: Date.now(), 
            sender: 'system', 
            text: '✅ Trial Protocol Parsed. Google Calendar Synced successfully.' 
         }]);
+        success = true;
       }
     } catch (error) {
       console.error("Registration Error:", error);
     }
     setIsRegistering(false);
+    return success;
   };
 
   const triggerEdemaView = async () => {
@@ -60,6 +66,8 @@ function App() {
         body: JSON.stringify({ activity: userIntent, date: "2026-04-19" })
       });
       const data = await response.json();
+      
+      if (data.twin_profile) setTwinProfile(data.twin_profile);
 
       if (data.conflict_detected) {
         // 3. Add K2's reasoning and attribution to the chat
@@ -96,23 +104,7 @@ function App() {
   };
 
   if (!isRegistered) {
-    return (
-      <div className="app-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div className="glass-panel" style={{ padding: '2rem', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
-          <h2>Register for TrialFlow</h2>
-          <p>Upload your clinical trial protocol document to begin your journey.</p>
-          <textarea 
-            value={protocolText}
-            onChange={(e) => setProtocolText(e.target.value)}
-            placeholder="Paste protocol document text here..."
-            style={{ width: '100%', height: '150px', margin: '1rem 0', padding: '0.5rem', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
-          />
-          <button className="primary-btn" onClick={handleRegister} disabled={isRegistering || !protocolText}>
-            {isRegistering ? 'Parsing & Generating Flowchart...' : 'Upload & Sync Calendar'}
-          </button>
-        </div>
-      </div>
-    );
+    return <LandingPage onRegister={handleRegister} />;
   }
 
   return (
@@ -125,7 +117,7 @@ function App() {
       <main className="dashboard" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '1rem', padding: '1rem', height: 'calc(100vh - 80px)' }}>
 
         {/* Top Left: K2 Think V2 Orchestrator Chat */}
-        <section className="chat-panel glass-panel" style={{ gridRow: '1 / 3' }}>
+        <section className="chat-panel glass-panel">
           <h2>K2 Think V2 Orchestrator</h2>
 
           <div className="chat-history">
@@ -152,6 +144,36 @@ function App() {
               {isLoading ? 'Running K2 Analysis...' : 'Simulate Calendar Sync (Gym)'}
             </button>
           </div>
+        </section>
+
+        {/* Bottom Left: Predictive Digital Twin Profile */}
+        <section className="twin-panel glass-panel" style={{ display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          <h2>Predictive Digital Twin</h2>
+          {twinProfile ? (
+            <div className="twin-stats" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <div className="stat-card" style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
+                <strong>Synthetic Cohort Matches:</strong> {twinProfile.synthetic_cohort_size} patients
+              </div>
+              <div className="stat-card" style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
+                <strong>Predicted Success Probability:</strong> <span style={{ color: '#4ade80' }}>{twinProfile.overall_trial_success_probability}%</span>
+              </div>
+              <div className="stat-card" style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid #f87171' }}>
+                <strong>Predicted Adverse Events:</strong>
+                <ul style={{ margin: '0.5rem 0 0 1.5rem' }}>
+                  {twinProfile.predicted_adverse_events.map((event, idx) => (
+                    <li key={idx}>
+                      <span style={{ color: '#f87171' }}>{event.probability}% risk</span> of {event.condition} ({event.timeline_trigger})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="stat-card" style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.9rem', color: '#9ca3af' }}>
+                Data Fidelity Score: {twinProfile.fidelity_score} (Cramer's V)
+              </div>
+            </div>
+          ) : (
+            <p style={{ padding: '1rem' }}>Loading Twin Profile...</p>
+          )}
         </section>
 
         {/* Top Right: Timeline Flowchart Video */}
