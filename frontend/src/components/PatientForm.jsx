@@ -13,6 +13,25 @@ const labels = {
   Age: "Age bucket (1-13)",
 };
 
+// Organize fields into logical sub-groups
+const groups = [
+  {
+    title: "Vitals & Biometrics",
+    icon: "❤️",
+    fields: ["HighBP", "HighChol", "BMI"],
+  },
+  {
+    title: "Lifestyle Factors",
+    icon: "🏃‍♂️",
+    fields: ["Smoker", "PhysActivity", "Fruits", "Veggies"],
+  },
+  {
+    title: "Status & Demographics",
+    icon: "📋",
+    fields: ["DiffWalk", "GenHlth", "PhysHlth", "MentHlth", "Age"],
+  },
+];
+
 const binaryFields = new Set(["HighBP", "HighChol", "Smoker", "PhysActivity", "Fruits", "Veggies", "DiffWalk"]);
 
 const ranges = {
@@ -25,44 +44,55 @@ const ranges = {
 
 export default function PatientForm({ patient, onChange, onLoadPreset }) {
   return (
-    <div className="form-grid">
-      <div className="preset-row">
+    <>
+      <div className="preset-row" style={{ marginBottom: "24px" }}>
         <button type="button" className="secondary-button" onClick={() => onLoadPreset("highRisk")}>
-          Load high-risk demo patient
+          Load high-risk patient
         </button>
         <button type="button" className="secondary-button" onClick={() => onLoadPreset("moderateRisk")}>
           Load moderate-risk patient
         </button>
       </div>
 
-      {Object.entries(patient).map(([field, value]) => {
-        if (binaryFields.has(field)) {
-          return (
-            <label key={field} className="field">
-              <span>{labels[field]}</span>
-              <select value={value} onChange={(event) => onChange(field, Number(event.target.value))}>
-                <option value={0}>No</option>
-                <option value={1}>Yes</option>
-              </select>
-            </label>
-          );
-        }
+      <div className="form-grid">
+        {groups.map((group, groupIdx) => (
+          <div key={group.title} style={{ display: "contents" }}>
+            <h3 className="form-section-title" style={{ marginTop: groupIdx === 0 ? "0" : "12px" }}>
+              <span>{group.icon}</span> {group.title}
+            </h3>
+            
+            {group.fields.map(field => {
+              const value = patient[field];
+              if (binaryFields.has(field)) {
+                return (
+                  <label key={field} className="field">
+                    <span>{labels[field]}</span>
+                    <select value={value} onChange={(event) => onChange(field, Number(event.target.value))}>
+                      <option value={0}>No</option>
+                      <option value={1}>Yes</option>
+                    </select>
+                  </label>
+                );
+              }
 
-        const range = ranges[field];
-        return (
-          <label key={field} className="field">
-            <span>{labels[field]}</span>
-            <input
-              type="number"
-              min={range.min}
-              max={range.max}
-              step={range.step}
-              value={value}
-              onChange={(event) => onChange(field, Number(event.target.value))}
-            />
-          </label>
-        );
-      })}
-    </div>
+              const range = ranges[field];
+              return (
+                <label key={field} className="field">
+                  <span>{labels[field]}</span>
+                  <input
+                    type="number"
+                    min={range.min}
+                    max={range.max}
+                    step={range.step}
+                    value={value}
+                    onChange={(event) => onChange(field, Number(event.target.value))}
+                  />
+                </label>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </>
   );
 }

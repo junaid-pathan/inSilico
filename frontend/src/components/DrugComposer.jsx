@@ -8,7 +8,7 @@ const demoDrugOptions = {
   },
   lifestyle: {
     drug_name: "Lifestyle Intensification Demo",
-    moa_summary: "Combines diet adherence and activity changes to reduce diabetes risk.",
+    moa_summary: "Combines diet adherence and activity changes to reduce critical disease risk.",
     expected_biomarker_effect: "Better activity profile, lower weight burden, improved general health markers.",
     gamma: 0.28,
     reasoning_brief: "Moderate but broad effect across behavior-linked features.",
@@ -17,53 +17,77 @@ const demoDrugOptions = {
 
 export default function DrugComposer({ moa, onChange, onLoadDemo }) {
   return (
-    <div className="form-grid">
-      <div className="preset-row">
+    <>
+      <div className="preset-row" style={{ marginBottom: "24px" }}>
         <button type="button" className="secondary-button" onClick={() => onLoadDemo(demoDrugOptions.glp1)}>
-          Load GLP-1 demo
+          Load GLP-1 pattern
         </button>
         <button type="button" className="secondary-button" onClick={() => onLoadDemo(demoDrugOptions.lifestyle)}>
-          Load lifestyle demo
+          Load lifestyle intervention
         </button>
       </div>
 
-      <label className="field field--wide">
-        <span>Drug name</span>
-        <input value={moa.drug_name} onChange={(event) => onChange("drug_name", event.target.value)} />
-      </label>
+      <div className="form-grid">
+        <h3 className="form-section-title">
+          <span>💊</span> Identification
+        </h3>
+        
+        <label className="field field--wide">
+          <span>Investigational Drug / Therapy Name</span>
+          <input 
+            value={moa.drug_name} 
+            onChange={(event) => onChange("drug_name", event.target.value)} 
+            placeholder="e.g., Semaglutide 2.4mg"
+          />
+        </label>
 
-      <label className="field field--wide">
-        <span>Mechanism of action summary</span>
-        <textarea value={moa.moa_summary} onChange={(event) => onChange("moa_summary", event.target.value)} />
-      </label>
+        <h3 className="form-section-title" style={{ marginTop: "12px" }}>
+          <span>🧬</span> Mechanism of Action (MoA)
+        </h3>
 
-      <label className="field field--wide">
-        <span>Expected biomarker effect</span>
-        <textarea
-          value={moa.expected_biomarker_effect}
-          onChange={(event) => onChange("expected_biomarker_effect", event.target.value)}
-        />
-      </label>
+        <label className="field field--wide">
+          <span>Clinical Mechanism Summary</span>
+          <textarea 
+            value={moa.moa_summary} 
+            onChange={(event) => onChange("moa_summary", event.target.value)} 
+            placeholder="Describe the primary pathways activated or inhibited..."
+          />
+        </label>
 
-      <label className="field">
-        <span>Gamma impact score</span>
-        <input
-          type="number"
-          min="0"
-          max="1"
-          step="0.01"
-          value={moa.gamma}
-          onChange={(event) => onChange("gamma", Number(event.target.value))}
-        />
-      </label>
+        <label className="field field--wide">
+          <span>Expected Biomarker Effects</span>
+          <textarea
+            value={moa.expected_biomarker_effect}
+            onChange={(event) => onChange("expected_biomarker_effect", event.target.value)}
+            placeholder="Which specific BRFSS indicators will shift? (e.g., BMI, HighBP)"
+          />
+        </label>
 
-      <label className="field field--wide">
-        <span>Reasoning brief</span>
-        <textarea
-          value={moa.reasoning_brief}
-          onChange={(event) => onChange("reasoning_brief", event.target.value)}
-        />
-      </label>
-    </div>
+        <h3 className="form-section-title" style={{ marginTop: "12px" }}>
+          <span>🧮</span> Prognostic Parameters
+        </h3>
+
+        <label className="field field--wide">
+          <span>Reasoning Brief</span>
+          <textarea
+            value={moa.reasoning_brief}
+            onChange={(event) => onChange("reasoning_brief", event.target.value)}
+            placeholder="Justification for the chosen gamma impact score..."
+          />
+        </label>
+
+        <label className="field">
+          <span>Gamma Impact Score (0.00 – 1.00)</span>
+          <input
+            type="number"
+            min="0"
+            max="1"
+            step="0.01"
+            value={moa.gamma}
+            onChange={(event) => onChange("gamma", Number(event.target.value))}
+          />
+        </label>
+      </div>
+    </>
   );
 }

@@ -74,6 +74,6 @@ export async function simulateTrial(patient, moa) {
     gamma,
     feature_deltas: featureDeltas,
     feature_importances: demoFeatureImportances,
-    explanation_summary: `${moa.drug_name} applies a gamma-weighted recovery move toward a healthier diabetes profile.`,
+    explanation_summary: `${moa.drug_name} applies a gamma-weighted recovery move toward a healthier clinical profile.`,
   };
 }
