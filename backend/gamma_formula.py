@@ -29,15 +29,21 @@ def _normalize(value: Optional[float], scale_abs: float, direction: str) -> floa
 def compute_gamma(endpoints: Dict[str, Optional[float]]) -> Dict[str, Any]:
     """
     Apply the calibrated formula to turn measured endpoints into a gamma value.
+    Think of Gamma as a "power multiplier": 0.0 means the drug does nothing, 
+    and 1.0 means it completely reverses the risk.
 
     Returns a dict with gamma, per-feature contributions, and the reasoning trail.
     """
+    # We pull the statistical weights from our calibration file
+    # This acts like our Machine Learning model's memory of past trials
     coefficients = load_coefficients()
     norm_cfg = coefficients["normalization"]
     weights = coefficients["weights"]
     intercept = float(coefficients.get("intercept", 0.0))
     bounds = coefficients.get("bounds", {"min": 0.05, "max": 0.85})
 
+    # Retrieves the raw clinical data (like blood sugar or weight loss)
+    # extracted by the AI from the medicine's PDF
     hba1c_raw = endpoints.get("delta_hba1c_percent")
     weight_kg = endpoints.get("delta_weight_kg")
     weight_pct = endpoints.get("delta_weight_percent")
@@ -79,6 +85,7 @@ def compute_gamma(endpoints: Dict[str, Optional[float]]) -> Dict[str, Any]:
         norm_cfg["relative_risk_reduction"]["direction"],
     )
 
+    # We calculate how much each factor contributes to the patient's recovery
     contributions = {
         "hba1c": weights["hba1c"] * hba1c_norm,
         "weight": weights["weight"] * weight_norm,
@@ -86,7 +93,10 @@ def compute_gamma(endpoints: Dict[str, Optional[float]]) -> Dict[str, Any]:
         "rrr": weights["rrr"] * rrr_norm,
     }
 
+    # Sum it all up to get the final "Gamma" power level for this medicine
     gamma_raw = intercept + sum(contributions.values())
+    
+    # Cap the Gamma value between reasonable bounds so our simulation doesn't break physics
     gamma = max(float(bounds["min"]), min(float(bounds["max"]), gamma_raw))
 
     reported: List[str] = []

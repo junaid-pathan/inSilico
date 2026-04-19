@@ -1,4 +1,4 @@
-// Hardcoded TrialForge demo data used across Simulator + Insights pages.
+// Hardcoded InSilico demo data used across Simulator + Insights pages.
 // All numbers are illustrative only.
 
 export const baselineVsTwin = [

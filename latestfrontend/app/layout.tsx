@@ -22,7 +22,7 @@ const orbitron = Orbitron({
 })
 
 export const metadata: Metadata = {
-  title: "TrialForge — Clinical Trial Companion",
+  title: "InSilico — Clinical Trial Companion",
   description:
     "An AI-powered clinical trial simulator and workflow assistant. Forge safer, faster, more personalized trials.",
   generator: "v0.app",

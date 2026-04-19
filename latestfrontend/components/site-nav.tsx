@@ -32,7 +32,7 @@ export function SiteNav() {
               </span>
             </span>
             <span className="font-display text-sm font-bold tracking-widest text-foreground">
-              TRIALFORGE
+              INSILICO
             </span>
           </Link>
 
@@ -63,7 +63,7 @@ export function SiteNav() {
               size="sm"
               className="font-display rounded-full bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:bg-accent/90"
             >
-              <Link href="/assistant">Enroll</Link>
+              <Link href="/assistant">Talk</Link>
             </Button>
           </div>
 

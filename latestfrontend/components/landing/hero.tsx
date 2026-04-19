@@ -31,7 +31,7 @@ export function LandingHero() {
       <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 px-6 py-20 text-center">
 
         <h1 className="font-display text-6xl font-bold leading-none tracking-tight md:text-8xl lg:text-[9rem]">
-          TRIALFORGE
+          INSILICO
         </h1>
 
         <div className="flex h-[72px] items-center justify-center md:h-[104px]">
@@ -45,7 +45,7 @@ export function LandingHero() {
         </div>
 
         <p className="max-w-2xl text-balance text-base leading-relaxed text-muted-foreground md:text-lg">
-          Forge safer, faster clinical trials. TrialForge simulates digital trial twins, composes drug
+          Forge safer, faster clinical trials. InSilico simulates digital trial twins, composes drug
           combinations, and walks every participant through their journey with a friendly AI companion.
         </p>
 

@@ -79,7 +79,7 @@ export function LandingFeatures() {
           <span className="shimmer-text">One orbit.</span>
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-          Every TrialForge module orbits the same core — from raw PDF to
+          Every InSilico module orbits the same core — from raw PDF to
           cohort-level simulation in seconds.
         </p>
       </div>

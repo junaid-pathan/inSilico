@@ -40,7 +40,7 @@ function getGradient(category: string) {
   return CATEGORY_GRADIENTS[category] ?? DEFAULT_GRADIENT
 }
 
-export default function RadialOrbitalTimeline({ timelineData, centerLabel = "TrialForge" }: RadialOrbitalTimelineProps) {
+export default function RadialOrbitalTimeline({ timelineData, centerLabel = "InSilico" }: RadialOrbitalTimelineProps) {
   const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({})
   const [rotationAngle, setRotationAngle] = useState<number>(0)
   const [autoRotate, setAutoRotate] = useState<boolean>(true)

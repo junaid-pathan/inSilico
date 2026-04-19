@@ -1,1 +1,1 @@
-# TrialForge backend package marker.
+# InSilico backend package marker.

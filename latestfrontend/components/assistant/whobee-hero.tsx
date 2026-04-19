@@ -54,7 +54,7 @@ export function WhobeeHero() {
       const response = await fetch("http://127.0.0.1:8000/whobee/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed, session_id: "trialforge-user" }),
+        body: JSON.stringify({ message: trimmed, session_id: "insilico-user" }),
       })
 
       const data = await response.json()
@@ -133,7 +133,7 @@ export function WhobeeHero() {
                       <Sparkles className="h-3.5 w-3.5 text-white" />
                     </span>
                     <div className="rounded-2xl rounded-tl-sm border border-white/10 bg-white/10 px-4 py-3 text-sm text-white backdrop-blur">
-                      Hi! I&apos;m Whobee — your TrialForge companion. Ask me anything about your trial.
+                      Hi! I&apos;m Whobee — your InSilico companion. Ask me anything about your trial.
                     </div>
                   </motion.div>
                 )}

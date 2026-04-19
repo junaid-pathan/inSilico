@@ -16,7 +16,7 @@ interface Message {
 const seedMessages: Message[] = [
   {
     role: "bot",
-    text: "Hi, I'm Whobee — your TrialForge companion. I'll walk you through your day, explain anything you don't understand, and nudge you if you miss a step.",
+    text: "Hi, I'm Whobee — your InSilico companion. I'll walk you through your day, explain anything you don't understand, and nudge you if you miss a step.",
   },
   {
     role: "bot",
@@ -47,7 +47,7 @@ export function MiniBot() {
         ...m,
         {
           role: "bot",
-          text: "Great question. In a wired build this routes to the TrialForge backend using the MoA + patient context. For now I'm a placeholder that logs your question and shows you where answers will land.",
+          text: "Great question. In a wired build this routes to the InSilico backend using the MoA + patient context. For now I'm a placeholder that logs your question and shows you where answers will land.",
         },
       ])
     }, 700)

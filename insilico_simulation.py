@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional
 import numpy as np
 import pandas as pd
 
-from trialforge_moa import DrugMoAInput
+from insilico_moa import DrugMoAInput
 
 RADAR_AXES: List[tuple[str, str, bool]] = [
     ("BMI", "BMI", False),

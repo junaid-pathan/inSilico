@@ -11,7 +11,7 @@ export function LandingFooter() {
               <Activity className="h-3.5 w-3.5" aria-hidden />
             </span>
             <span className="font-display text-sm font-bold tracking-widest">
-              TRIALFORGE
+              INSILICO
             </span>
           </Link>
 
@@ -35,7 +35,7 @@ export function LandingFooter() {
           </nav>
 
           <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-            © {new Date().getFullYear()} TrialForge · Research use only
+            © {new Date().getFullYear()} InSilico · Research use only
           </p>
         </div>
       </div>

@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 
 from backend.model_loader import load_backend_state, score_patient_payload, simulate_payload
 from backend.pdf_parser import PdfParseError, parse_trial_pdf
-from trialforge_moa import DrugMoAInput
+from insilico_moa import DrugMoAInput
 
 
 class PatientFeatures(BaseModel):
@@ -51,7 +51,7 @@ class SimulateTrialRequest(BaseModel):
     moa: MoAPayload
 
 
-app = FastAPI(title="TrialForge Backend", version="0.1.0")
+app = FastAPI(title="InSilico Backend", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -62,6 +62,8 @@ app.add_middleware(
 )
 
 
+# Checks if our backend is alive and well.
+# It's useful for debugging and making sure the server didn't crash.
 @app.get("/health")
 def health() -> Dict[str, Any]:
     state = load_backend_state()
@@ -73,17 +75,23 @@ def health() -> Dict[str, Any]:
     }
 
 
+# Calculates the "Baseline Score" (how sick the patient is)
+# by running the BRFSS patient data through our pre-trained XGBoost AI model.
 @app.post("/score-patient")
 def score_patient_endpoint(request: ScorePatientRequest) -> Dict[str, Any]:
     return score_patient_payload(request.patient.model_dump())
 
 
+# This endpoint takes the Patient's baseline stats AND the drug's Mechanism of Action (MoA),
+# combines them using our special Gamma formula, and simulates the patient's future health trajectory!
 @app.post("/simulate-trial")
 def simulate_trial_endpoint(request: SimulateTrialRequest) -> Dict[str, Any]:
     moa = DrugMoAInput.from_dict(request.moa.model_dump())
     return simulate_payload(request.patient.model_dump(), moa)
 
 
+# This is the "brain" parser! It accepts a highly technical medical PDF,
+# reads the bytes, and passes it to the Gemini RAG pipeline to extract the medicine's key properties.
 @app.post("/parse-trial-pdf")
 async def parse_trial_pdf_endpoint(file: UploadFile = File(...)) -> Dict[str, Any]:
     # Always return 200 with an error payload on failure so the browser can

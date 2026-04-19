@@ -15,8 +15,8 @@ try:
 except ImportError:  # pragma: no cover
     shap = None
 
-from trialforge_moa import DrugMoAInput
-from trialforge_simulation import (
+from insilico_moa import DrugMoAInput
+from insilico_simulation import (
     SimulationContext,
     build_explanation_summary,
     score_patient,
