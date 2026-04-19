@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from backend.model_loader import load_backend_state, score_patient_payload, simulate_payload
+from backend.openclaw_client import OpenClawError, invoke_openclaw_agent
 from backend.pdf_parser import PdfParseError, parse_trial_pdf
 from insilico_moa import DrugMoAInput
 
@@ -51,7 +52,12 @@ class SimulateTrialRequest(BaseModel):
     moa: MoAPayload
 
 
-app = FastAPI(title="InSilico Backend", version="0.1.0")
+class WhobeeChatRequest(BaseModel):
+    message: str = Field(..., min_length=1)
+    session_id: str = Field(default="trialforge-user")
+
+
+app = FastAPI(title="TrialForge Backend", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -116,4 +122,18 @@ async def parse_trial_pdf_endpoint(file: UploadFile = File(...)) -> Dict[str, An
             "error": True,
             "detail": f"{type(exc).__name__}: {exc}",
             "traceback": tb,
+        }
+
+
+@app.post("/whobee/chat")
+def whobee_chat_endpoint(request: WhobeeChatRequest) -> Dict[str, Any]:
+    try:
+        return invoke_openclaw_agent(
+            message=request.message.strip(),
+            session_id=request.session_id.strip() or "trialforge-user",
+        )
+    except OpenClawError as exc:
+        return {
+            "error": True,
+            "detail": str(exc),
         }

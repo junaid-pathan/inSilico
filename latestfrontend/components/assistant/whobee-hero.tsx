@@ -7,6 +7,8 @@ import { Spotlight } from "@/components/ui/spotlight"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"
+
 // The humanoid robot scene from the reference demo
 const ROBOT_SCENE_URL = "https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
 
@@ -51,7 +53,7 @@ export function WhobeeHero() {
     setIsTyping(true)
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/whobee/chat", {
+      const response = await fetch(`${API_BASE_URL}/whobee/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmed, session_id: "insilico-user" }),
