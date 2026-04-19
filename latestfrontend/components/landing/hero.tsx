@@ -60,7 +60,7 @@ export function LandingHero() {
 
         <dl className="mt-8 grid w-full max-w-2xl grid-cols-3 gap-3">
           {[
-            { k: "12.4K", v: "Twin simulations" },
+            { k: "720", v: "Simulations" },
             { k: "98.2%", v: "Consent clarity" },
             { k: "4.6x", v: "Faster protocols" },
           ].map((item) => (
@@ -71,13 +71,7 @@ export function LandingHero() {
           ))}
         </dl>
 
-        {/* scroll hint */}
-        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Scroll</span>
-          <div className="flex h-8 w-5 items-start justify-center rounded-full border border-muted-foreground/40 pt-1.5">
-            <span className="h-1.5 w-0.5 animate-scroll-hint rounded-full bg-[oklch(0.64_0.24_25)]" />
-          </div>
-        </div>
+
       </div>
     </section>
   )
