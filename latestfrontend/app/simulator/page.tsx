@@ -6,49 +6,83 @@ import { SiteNav } from "@/components/site-nav"
 import { LandingFooter } from "@/components/landing/footer"
 import { PageHeader } from "@/components/data/page-header"
 import { MetricCard } from "@/components/data/metric-card"
+import { Button } from "@/components/ui/button"
 import FileUpload from "@/components/ui/file-upload"
 import {
-  AdverseEventsChart,
+  PatientProfileForm,
+  patientPresets,
+  type PatientProfile,
+} from "@/components/simulator/patient-profile-form"
+import {
   BaselineVsTwinChart,
   BiomarkerRadarChart,
   CohortPieChart,
   FeatureImportanceChart,
+  LocalShapChart,
 } from "@/components/data/trial-charts"
-import { adverseEvents, biomarkerRadar, cohortBreakdown } from "@/lib/trial-data"
-import { simulateTrial } from "@/lib/api"
+import { scorePatient, simulateTrial } from "@/lib/api"
 
-const patientPreset = {
-  HighBP: 1,
-  HighChol: 1,
-  BMI: 35,
-  Smoker: 0,
-  PhysActivity: 0,
-  Fruits: 0,
-  Veggies: 1,
-  DiffWalk: 1,
-  GenHlth: 4,
-  PhysHlth: 12,
-  MentHlth: 7,
-  Age: 9,
-};
+const cohortColors: Record<string, string> = {
+  Responders: "var(--chart-1)",
+  Partial: "var(--chart-5)",
+  "No effect": "var(--chart-3)",
+  Adverse: "var(--chart-2)",
+}
 
 export default function SimulatorPage() {
+  const [patient, setPatient] = useState<PatientProfile>(patientPresets.highRisk);
   const [isUploaded, setIsUploaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [simulationData, setSimulationData] = useState<any>(null);
   const [moaData, setMoaData] = useState<any>(null);
+  const [baselineScore, setBaselineScore] = useState<any>(null);
+  const [requestError, setRequestError] = useState("");
+
+  const updatePatientField = (field: keyof PatientProfile, value: number) => {
+    setPatient((current) => {
+      if (!Number.isFinite(value)) {
+        return current
+      }
+      return { ...current, [field]: value }
+    })
+  }
+
+  const loadPatientPreset = (preset: keyof typeof patientPresets) => {
+    setPatient(patientPresets[preset])
+    setBaselineScore(null)
+    setRequestError("")
+  }
+
+  const handleBaselineScore = async () => {
+    setIsLoading(true)
+    setRequestError("")
+    try {
+      const response = await scorePatient(patient)
+      setBaselineScore(response)
+    } catch (err: any) {
+      setRequestError(err.message || "Failed to score baseline patient")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleUploadComplete = async (moa: any) => {
     setIsLoading(true);
+    setRequestError("");
     try {
       if (moa) {
         setMoaData(moa);
-        const result = await simulateTrial(patientPreset, moa);
+        const result = await simulateTrial(patient, moa);
         setSimulationData(result);
+        setBaselineScore({
+          risk_score: result.baseline_score,
+          mode: result.mode,
+        });
         setIsUploaded(true);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setRequestError(err.message || "Failed to run simulation");
     } finally {
       setIsLoading(false);
     }
@@ -58,18 +92,94 @@ export default function SimulatorPage() {
     return (
       <main className="relative min-h-screen">
         <SiteNav />
-        <div className="mx-auto max-w-7xl px-4 py-32 flex flex-col items-center justify-center min-h-[70vh]">
-          <h1 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-widest text-center mb-12 text-glow">
-            Upload your mechanism of action document
-          </h1>
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center gap-4 text-primary">
-              <Loader className="w-12 h-12 animate-spin" />
-              <p className="text-xl font-display uppercase tracking-widest text-glow">Running Simulation...</p>
-            </div>
-          ) : (
-            <FileUpload onUploadComplete={handleUploadComplete} />
-          )}
+        <div className="mx-auto max-w-7xl px-4 py-24 lg:px-8">
+          <div className="mx-auto mb-10 max-w-3xl text-center">
+            <h1 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-widest text-glow">
+              Patient profile plus mechanism upload
+            </h1>
+            <p className="mt-4 text-sm text-muted-foreground md:text-base">
+              Enter the BRFSS-style patient fields first, then upload your mechanism of action
+              document so the simulation runs on the actual profile you provide.
+            </p>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-[1.25fr_0.9fr]">
+            <section className="card-glass rounded-3xl p-6 md:p-8">
+              <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">
+                    / Patient input
+                  </p>
+                  <h2 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
+                    Baseline profile
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+                    These fields match the backend simulation contract and replace the old hardcoded
+                    patient preset.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBaselineScore}
+                  disabled={isLoading}
+                >
+                  Score baseline
+                </Button>
+              </div>
+
+              <PatientProfileForm
+                patient={patient}
+                onChange={updatePatientField}
+                onLoadPreset={loadPatientPreset}
+              />
+
+              <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
+                {baselineScore ? (
+                  <p className="rounded-full border border-border/60 bg-background/20 px-4 py-2 text-muted-foreground">
+                    Baseline risk:{" "}
+                    <span className="font-semibold text-foreground">
+                      {(baselineScore.risk_score * 100).toFixed(1)}%
+                    </span>{" "}
+                    ({baselineScore.mode} mode)
+                  </p>
+                ) : (
+                  <p className="text-muted-foreground">
+                    Score the profile to preview baseline risk before uploading the document.
+                  </p>
+                )}
+                {requestError ? (
+                  <p className="text-sm text-[oklch(0.72_0.2_25)]">{requestError}</p>
+                ) : null}
+              </div>
+            </section>
+
+            <section className="card-glass rounded-3xl p-6 md:p-8">
+              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent">
+                / Mechanism upload
+              </p>
+              <h2 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
+                Upload MoA document
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Once the PDF is parsed, TrialForge will simulate the intervention on the patient
+                profile entered on the left.
+              </p>
+
+              <div className="mt-6">
+                {isLoading ? (
+                  <div className="flex min-h-[260px] flex-col items-center justify-center gap-4 text-primary">
+                    <Loader className="h-12 w-12 animate-spin" />
+                    <p className="text-center text-xl font-display uppercase tracking-widest text-glow">
+                      Running simulation...
+                    </p>
+                  </div>
+                ) : (
+                  <FileUpload onUploadComplete={handleUploadComplete} />
+                )}
+              </div>
+            </section>
+          </div>
         </div>
         <LandingFooter />
       </main>
@@ -80,19 +190,28 @@ export default function SimulatorPage() {
   const featureImportance = Object.entries(simulationData.feature_importances || {}).map(
     ([feature, value]) => ({ feature, value })
   ).sort((a: any, b: any) => b.value - a.value);
+  const localShapDelta = simulationData.local_shap?.delta || [];
 
   // Map feature deltas
   const featureDeltas = simulationData.feature_deltas || [];
+  const biomarkerRadar = simulationData.biomarker_radar || [];
+  const cohortBreakdown = (simulationData.cohort_breakdown || []).map((entry: any) => ({
+    ...entry,
+    color: cohortColors[entry.name] || "var(--chart-3)",
+  }));
+  const cohortSize = simulationData.cohort_size || cohortBreakdown.reduce((sum: number, item: any) => sum + Number(item.value || 0), 0);
+  const confidenceScore = Number.isFinite(simulationData.confidence_score) ? simulationData.confidence_score : null;
 
   // Generate baseline vs twin interpolation
   const baseline_score = simulationData.baseline_score * 100;
   const trial_score = simulationData.trial_score * 100;
+  const improvementPoints = baseline_score - trial_score;
   const baselineVsTwin = [
     { label: "Wk 0", baseline: baseline_score, twin: baseline_score },
-    { label: "Wk 4", baseline: baseline_score - 0.5, twin: baseline_score - (baseline_score - trial_score) * 0.2 },
-    { label: "Wk 8", baseline: baseline_score - 1.0, twin: baseline_score - (baseline_score - trial_score) * 0.5 },
-    { label: "Wk 12", baseline: baseline_score - 1.5, twin: baseline_score - (baseline_score - trial_score) * 0.75 },
-    { label: "Wk 24", baseline: baseline_score - 2.5, twin: trial_score },
+    { label: "Wk 4", baseline: baseline_score, twin: baseline_score - (improvementPoints * 0.2) },
+    { label: "Wk 8", baseline: baseline_score, twin: baseline_score - (improvementPoints * 0.45) },
+    { label: "Wk 12", baseline: baseline_score, twin: baseline_score - (improvementPoints * 0.7) },
+    { label: "Wk 24", baseline: baseline_score, twin: trial_score },
   ];
 
   const keyMetrics = [
@@ -100,8 +219,8 @@ export default function SimulatorPage() {
     { label: "Trial twin risk", value: `${trial_score.toFixed(1)}%`, tone: "good" as const, delta: `−${(baseline_score - trial_score).toFixed(1)} pts` },
     { label: "Predicted Δ", value: `+${(baseline_score - trial_score).toFixed(1)}`, tone: "good" as const, delta: "pts improvement" },
     { label: "Gamma", value: simulationData.gamma?.toFixed(2) || "0.42", tone: "primary" as const, delta: moaData?.drug_name || "GLP-1 demo" },
-    { label: "Cohort N", value: "720", tone: "neutral" as const, delta: "digital twins" },
-    { label: "Confidence", value: "94.1%", tone: "primary" as const, delta: "5-fold CV" },
+    { label: "Cohort N", value: `${cohortSize}`, tone: "neutral" as const, delta: "simulated twins" },
+    { label: "Confidence", value: confidenceScore !== null ? `${confidenceScore.toFixed(1)}%` : "n/a", tone: "primary" as const, delta: "cohort-derived" },
   ];
 
   return (
@@ -157,7 +276,7 @@ export default function SimulatorPage() {
                 </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                Risk score (%) over the simulated protocol window
+                Interpolated risk score (%) from the simulated start/end states
               </p>
             </div>
             <BaselineVsTwinChart data={baselineVsTwin} />
@@ -170,13 +289,17 @@ export default function SimulatorPage() {
                 / Explainability
               </p>
               <h2 className="font-display mt-2 text-xl font-bold uppercase tracking-tight md:text-2xl">
-                Top feature importances
+                Local SHAP shifts
               </h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                Relative contribution of each BRFSS input to the predicted Δ risk.
+                Patient-specific SHAP contributions showing which features move predicted risk up or down.
               </p>
               <div className="mt-6">
-                <FeatureImportanceChart data={featureImportance} />
+                {localShapDelta.length > 0 ? (
+                  <LocalShapChart data={localShapDelta} />
+                ) : (
+                  <FeatureImportanceChart data={featureImportance} />
+                )}
               </div>
             </section>
 
@@ -189,7 +312,7 @@ export default function SimulatorPage() {
                 Response breakdown
               </h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                N = 720 digital twins
+                N = {cohortSize} simulated twins
               </p>
               <div className="mt-4">
                 <CohortPieChart data={cohortBreakdown} />
@@ -201,10 +324,10 @@ export default function SimulatorPage() {
           <div className="mt-6 grid gap-6 lg:grid-cols-5">
             <section className="card-glass col-span-1 rounded-3xl p-6 lg:col-span-2">
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">
-                / Biomarkers
+                / Feature profile
               </p>
               <h2 className="font-display mt-2 text-xl font-bold uppercase tracking-tight md:text-2xl">
-                Multi-axis read-out
+                Model read-out
               </h2>
               <div className="mt-4">
                 <BiomarkerRadarChart data={biomarkerRadar} />
@@ -263,37 +386,6 @@ export default function SimulatorPage() {
               </div>
             </section>
           </div>
-
-          {/* Adverse events */}
-          <section className="card-glass mt-6 rounded-3xl p-6">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent">
-                  / Safety
-                </p>
-                <h2 className="font-display mt-2 text-xl font-bold uppercase tracking-tight md:text-2xl">
-                  Adverse event surveillance · 7d
-                </h2>
-              </div>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "var(--chart-3)" }} />
-                  Mild
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "var(--chart-4)" }} />
-                  Moderate
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "var(--chart-2)" }} />
-                  Severe
-                </span>
-              </div>
-            </div>
-            <div className="mt-6">
-              <AdverseEventsChart data={adverseEvents} />
-            </div>
-          </section>
 
           {/* Narrative panel */}
           <section className="card-glass relative mt-10 overflow-hidden rounded-3xl p-8 md:p-10">

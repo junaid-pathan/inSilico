@@ -65,7 +65,18 @@ export default function FileUpload({ onUploadComplete }: { onUploadComplete?: (d
     try {
       setUploadError(null);
       const data = await parseTrialPdf(file);
-      
+
+      const usedFormula = data?.mode === "pdf_formula";
+      console.log(
+        `%c[TrialForge] gamma ${Number(data?.gamma ?? 0).toFixed(2)} via ${usedFormula ? "CALIBRATED FORMULA ✅" : "LLM GUESS (fallback) 🟡"}`,
+        `font-weight: bold; color: ${usedFormula ? "#166534" : "#92400e"}; font-size: 13px;`
+      );
+      if (!usedFormula) {
+        console.log("[TrialForge] fallback_reason:", data?.fallback_reason);
+      }
+      console.log("[TrialForge] extracted endpoints:", data?.evidence?.endpoints_extracted);
+      console.log("[TrialForge] full parsed response:", data);
+
       clearInterval(interval);
       setFiles((prev) =>
         prev.map((f) =>
