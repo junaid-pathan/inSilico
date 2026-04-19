@@ -358,6 +358,308 @@ Built with **Next.js 14** + **TypeScript** + **Radix UI**
 
 ---
 
+## 👥 Patient Engagement & Continuous Monitoring (Roadmap)
+
+### **Vision: Holistic Patient Care Architecture**
+
+InSilico's **Phase 2 roadmap** extends beyond static simulations to build a **patient-centric continuous monitoring system**. Here's what we're planning to enable ongoing patient engagement and real-time trial management:
+
+> ⚠️ **Note**: The following features are currently in **design & planning phase**. Current MVP focuses on core simulation engine. Patient integrations launching in Q3 2026.
+
+```mermaid
+graph TB
+    subgraph Patient["📱 Patient Touchpoints [PLANNED]"]
+        APP["Apple Health<br/>HealthKit API"]
+        WEAR["Wearables<br/>Fitbit, Apple Watch"]
+        CAL["Calendar Sync<br/>Visit Reminders"]
+        SMS["SMS/Push Alerts<br/>Medication Reminders"]
+    end
+    
+    subgraph Agent["🤖 Agentic Brain [IN DEVELOPMENT]"]
+        OPEN["Open Claw Agent Framework<br/>Tool-Use Orchestration"]
+        SCHEMA["Tool Schema Registry<br/>Standardized APIs"]
+        REASON["Reasoning Engine<br/>Multi-step Decision Making"]
+        MEMORY["Agent Memory<br/>Patient Context & History"]
+    end
+    
+    subgraph Clinical["🏥 Clinical Tracking [PLANNED]"]
+        INTAKE["Automated Intake<br/>Wearable Data"]
+        ANALYSIS["Real-time Analysis<br/>Biomarker Trends"]
+        ALERTS["Clinical Alerts<br/>Out-of-range Values"]
+        REPORT["Provider Dashboard<br/>Aggregated Insights"]
+    end
+    
+    subgraph Feedback["📊 Adaptive Interventions [PLANNED]"]
+        ADAPT["Adapt Treatment<br/>Based on Adherence"]
+        PREDICT["Predict Dropouts<br/>Intervene Proactively"]
+        OPTIMIZE["Optimize Therapy<br/>Personalized Recommendations"]
+    end
+    
+    APP -->|Stream Data| INTAKE
+    WEAR -->|Real-time Metrics| INTAKE
+    INTAKE -->|Raw Data| OPEN
+    OPEN -->|Execute Tools| SCHEMA
+    SCHEMA -->|Query APIs| MEMORY
+    MEMORY -->|Context| REASON
+    REASON -->|Clinical Decisions| ANALYSIS
+    ANALYSIS -->|Risk Signals| ALERTS
+    ALERTS -->|Notify Patient| SMS
+    ALERTS -->|Notify Provider| REPORT
+    REPORT -->|Recommendations| ADAPT
+    ADAPT -->|Personalized Plan| CAL
+    CAL -->|Schedule| APP
+    ADAPT -->|Patient Engagement| PREDICT
+    PREDICT -->|Intervention| OPTIMIZE
+    OPTIMIZE -->|Loop Back| REASON
+    
+    style Patient fill:#e3f2fd
+    style Agent fill:#fff3e0
+    style Clinical fill:#f3e5f5
+    style Feedback fill:#e8f5e9
+```
+
+### **Agentic System: Open Claw Framework (Planned)**
+
+We plan to leverage **Open Claw**, a modern multi-agent orchestration framework, to enable autonomous patient care:
+
+#### **Planned Agent Capabilities:**
+
+1. **Data Integration Agent** 🔄
+   - Poll wearables (Apple Watch, Fitbit) every 15 minutes
+   - Fetch health data from Apple HealthKit API
+   - Normalize data across heterogeneous sources
+   - Detect anomalies in real-time (e.g., elevated BP readings)
+
+2. **Patient Engagement Agent** 💬
+   - Schedule appointments via calendar integrations (Google Calendar, Outlook)
+   - Send personalized medication reminders via SMS/push notifications
+   - Provide adaptive guidance based on adherence patterns
+   - Escalate to human care team if engagement drops
+
+3. **Clinical Decision Agent** 🏥
+   - Run continuous risk re-scoring using updated biomarkers
+   - Compare current patient trajectory vs. simulated outcomes
+   - Flag deviations from expected response patterns
+   - Generate evidence-based intervention recommendations
+
+4. **Outcome Prediction Agent** 📊
+   - Predict dropout risk using behavioral + clinical features
+   - Identify responders vs. non-responders early
+   - Recommend cohort adjustments to trial teams
+   - Optimize randomization strategy in real-time
+
+#### **Tool Schema Registry (Planned):**
+
+The Open Claw agent will operate via a standardized **Tool API Schema**:
+
+```json
+{
+  "tools": [
+    {
+      "name": "fetch_wearable_data",
+      "description": "Retrieve real-time metrics from connected wearables",
+      "inputs": {
+        "patient_id": "string",
+        "metric_type": ["steps", "heart_rate", "sleep", "blood_pressure"],
+        "time_window": "number (minutes)"
+      },
+      "outputs": {
+        "timestamp": "ISO8601",
+        "value": "number",
+        "device": "string"
+      }
+    },
+    {
+      "name": "update_patient_risk",
+      "description": "Recalculate patient risk score with latest biomarkers",
+      "inputs": {
+        "patient_id": "string",
+        "biomarkers": "object"
+      },
+      "outputs": {
+        "baseline_risk": "number",
+        "current_risk": "number",
+        "trajectory": "string",
+        "shap_deltas": "object"
+      }
+    },
+    {
+      "name": "schedule_appointment",
+      "description": "Create calendar event for patient visit",
+      "inputs": {
+        "patient_id": "string",
+        "provider_id": "string",
+        "visit_type": ["in-person", "telehealth", "follow-up"],
+        "preferred_date": "ISO8601"
+      },
+      "outputs": {
+        "event_id": "string",
+        "confirmed": "boolean",
+        "reminder_sent": "boolean"
+      }
+    },
+    {
+      "name": "send_patient_alert",
+      "description": "Notify patient of medication or appointment via SMS/push",
+      "inputs": {
+        "patient_id": "string",
+        "message_type": ["medication", "appointment", "alert"],
+        "content": "string"
+      },
+      "outputs": {
+        "sent": "boolean",
+        "delivery_time": "ISO8601"
+      }
+    },
+    {
+      "name": "predict_adherence",
+      "description": "ML-powered prediction of patient medication adherence",
+      "inputs": {
+        "patient_id": "string",
+        "lookback_days": "number"
+      },
+      "outputs": {
+        "adherence_score": "number [0-1]",
+        "risk_factors": ["array"],
+        "recommendation": "string"
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 📱 Health Tech Integrations: Product Roadmap
+
+### **Current MVP Status** ✅
+
+**What's Live Now:**
+- ✅ Core simulation engine with Centroid Recovery model
+- ✅ SHAP-based explainability layer
+- ✅ PDF parsing via RAG + Google Gemini
+- ✅ FastAPI backend with 3 core endpoints
+- ✅ Next.js interactive dashboard
+- ✅ Risk prediction with Random Forest
+
+### **Phase 1: Wearable Data Streaming (Q2 2026)** 🟡
+
+**Current Status**: Architecture & API design in progress
+
+| Platform | Data Captured | Sync Frequency | Status |
+|----------|---------------|-----------------|--------|
+| **Apple Watch** | Heart rate, steps, ECG, blood oxygen | Every 15 min | 🟡 Design Phase |
+| **Fitbit** | Sleep, activity, heart rate variability | Hourly | 🟡 Design Phase |
+| **Garmin** | Cardiac load, respiration rate, VO2 max | Daily | 🟢 Planned Q3 |
+| **Oura Ring** | Sleep quality, readiness score, body temp | Nightly | 🟢 Planned Q4 |
+
+**Planned Integration Method:**
+```python
+# Example: Apple HealthKit data fetch (NOT YET IMPLEMENTED)
+from backend.integrations import HealthKitConnector
+
+connector = HealthKitConnector(patient_id="PATIENT_001")
+health_data = connector.fetch_recent_metrics(
+    metrics=["HKQuantityTypeIdentifierStepCount", 
+             "HKQuantityTypeIdentifierHeartRate"],
+    hours_back=24
+)
+
+# Automatic normalization
+normalized = connector.normalize_to_patient_schema(health_data)
+# → Updates patient's PhysActivity & GenHlth biomarkers in real-time
+```
+
+### **Phase 2: Calendar & Appointment Sync (Q3 2026)** 🟢
+
+**Status**: Roadmap item—will integrate after wearables MVP
+
+**Planned Calendar API Integrations:**
+- **Google Calendar**: Appointment creation, reminder management
+- **Apple Calendar**: iCloud sync with patient devices
+- **Microsoft Outlook**: Enterprise hospital systems integration
+
+**Planned Use Cases:**
+- Auto-schedule follow-up visits based on patient risk trajectory
+- Send smart reminders 24h before appointments with telehealth links
+- Block medication administration windows in patient calendar
+- Alert providers when patients miss scheduled check-ins
+
+**Pseudocode (planned, not implemented):**
+```python
+# Example: Smart appointment scheduling (FUTURE)
+from backend.agents import AppointmentAgent
+
+agent = AppointmentAgent(patient_id="PATIENT_001")
+
+# Agent autonomously decides next visit type based on risk
+next_visit = agent.recommend_visit_timing(
+    current_risk=0.42,
+    risk_trend="increasing",
+    adherence_score=0.95
+)
+# → Returns: {"visit_type": "telehealth", "days_until": 7}
+
+agent.schedule_calendar_event(
+    visit_type=next_visit["visit_type"],
+    provider_id="DR_SMITH",
+    send_reminder=True
+)
+```
+
+### **Phase 3: Apple Health Ecosystem (Q4 2026)** 🟢
+
+**Status**: Planned integration after wearables + calendar
+
+**Planned HealthKit Permissions:**
+- 🏃 Workout data (for PhysActivity calculation)
+- ❤️ Heart rate & cardiac data (for risk re-scoring)
+- 😴 Sleep analysis (for GenHlth assessment)
+- 🩺 Clinical records (for medication tracking)
+- 💊 Medication adherence (from Health app)
+
+**Planned Real-World Example Flow:**
+
+```
+[ILLUSTRATIVE FUTURE SCENARIO]
+
+Patient wakes up (6:30 AM)
+    ↓
+Apple Watch detects elevated resting heart rate (78 bpm)
+    ↓
+[Open Claw Agent] Fetches latest HealthKit data
+    ↓
+[Data Integration Agent] Normalizes: HighBP flag detected
+    ↓
+[Clinical Decision Agent] Re-runs risk model with new BP
+    ↓
+Baseline Risk: 0.42 → Current Risk: 0.48 (↑ 14%)
+    ↓
+[Patient Engagement Agent] Sends SMS:
+"Your recent readings show elevated BP. 
+ Take your medication now. 
+ Schedule visit with Dr. Smith? [Yes/No]"
+    ↓
+Patient clicks [Yes] → Calendar synced, reminder set
+    ↓
+[Provider Dashboard] Alert: "PATIENT_001 Risk Trend ↑
+ Recommend clinical review within 48h"
+```
+
+### **Phase 4: Longitudinal Health Tracking (2027+)** 🔮
+
+**Status**: Long-term vision
+
+Advanced capabilities we're planning:
+
+- **Predictive Intervention**: Agent recommends lifestyle changes before risk escalates
+- **Federated Learning**: Multi-trial data pooling (privacy-preserved)
+- **Dynamic Cohort Adjustment**: Real-time rebalancing of trial arms based on efficacy
+- **Conversational Health Assistant**: Natural language interface for patient questions
+- **Hospital EHR Integration**: Bi-directional sync with clinical workflows (FHIR-compliant)
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer | Technology | Purpose |
@@ -367,15 +669,89 @@ Built with **Next.js 14** + **TypeScript** + **Radix UI**
 | **Synthetic Data** | SDV (TVAE) | Generate synthetic patients |
 | **Explainability** | SHAP | Feature attribution & interpretation |
 | **PDF Processing** | PyPDF, Google Gemini AI | Extract trial data from PDFs |
+| **Agentic Framework** | Open Claw | Multi-agent orchestration, tool use |
+| **Agent Memory** | LangChain + ChromaDB | Context persistence, retrieval |
+| **Health Integrations** | Apple HealthKit, Fitbit API, Google Fit | Real-time wearable data streaming |
+| **Calendar Integration** | Google Calendar API, Microsoft Graph | Appointment scheduling & sync |
+| **Messaging** | Twilio SMS + Firebase Cloud Messaging | Patient notifications & reminders |
 | **Frontend** | Next.js 14, TypeScript, React | Interactive dashboard |
 | **UI Components** | Radix UI, Tailwind CSS | Accessible component library |
 | **Visualization** | Matplotlib, Seaborn, Chart.js | Data visualization |
-| **Database** | ChromaDB | Vector database for RAG retrieval |
-| **Deployment** | Uvicorn, Vercel | Backend/frontend deployment |
+| **Database** | ChromaDB, PostgreSQL (planned) | Vector & relational storage |
+| **Deployment** | Uvicorn, Vercel, Docker | Backend/frontend deployment |
 
 ---
 
-## 🚀 Quick Start
+## 🏥 Patient Outcomes & Continuous Monitoring (Future Vision)
+
+### **Projected Impact: Once Integrations Complete**
+
+When we launch Phase 1-3 integrations, here's the vision for patient outcomes and continuous monitoring:
+
+> 📋 **Disclaimer**: The following section describes **projected outcomes** once wearable + calendar + Apple Health integrations are implemented (Q4 2026+). These are NOT current capabilities. The current MVP focuses on core simulation and explainability.
+
+### **Patient Journey: Day-by-Day Example (Projected)**
+
+**Day 0: Enrollment**
+- Patient enrolled in diabetes intervention trial
+- Baseline risk score: 42% (captured via `/score-patient` endpoint) ✅ *Current*
+- Wearables: Apple Watch paired + HealthKit permissions granted 🔮 *Future*
+- Calendar: First follow-up scheduled for Day 14 🔮 *Future*
+
+**Days 1-7: Passive Monitoring** 🔮
+- 🤖 Open Claw agents continuously poll wearable data
+- Heart rate, step count, sleep quality automatically ingested
+- SHAP values re-calculated daily with new biomarkers
+- Patient receives daily SMS: *"Great adherence! ✅ Keep up the medication routine."*
+
+**Day 8: Early Signal Detection** 🔮
+- Patient misses medication 3 times
+- **Adherence Agent** flags: Adherence score drops from 0.95 → 0.72
+- **Prediction Agent** estimates: Without intervention, dropout risk = 65%
+- **Engagement Agent** sends: *"We noticed you missed doses. Reschedule reminder? [Yes/No]"*
+- Calendar updated: Next check-in moved from Day 14 → Day 10
+
+**Day 10: Clinical Intervention** 🔮
+- Telehealth visit scheduled automatically
+- Provider sees live dashboard: Patient risk trending UP (42% → 48%)
+- SHAP breakdown shows: *"Blood pressure elevation responsible for +6% risk increase"*
+- Decision: Adjust medication dosage
+- New risk projection: 38% (with compliance) vs. 55% (without)
+
+**Days 11-21: Adaptive Response** 🔮
+- New medication regimen entered into agent system
+- Wearable data now shows BP trending DOWN
+- Risk re-scoring shows 42% → 35% improvement
+- **Outcome Agent** classifies patient as: "Strong Responder" 🟢
+
+**Day 22: Trial Week Report** 🔮
+- Patient receives summary: *"You're ahead of 75% of trial participants!"*
+- Provider sees automated report:
+  - Adherence: 91%
+  - Risk reduction: 16.7%
+  - Projected clinical success: 82%
+  - Recommendation: Continue current therapy ✅
+
+### **Projected Cohort-Level Outcomes (Post-Integration)**
+
+| Metric | Traditional Trial | InSilico (Projected) | Potential Improvement |
+|--------|------------------|-------------------|-------------|
+| **Dropout Rate** | 23% | ~8% | ↓ 65% |
+| **Adverse Event Detection** | 2-3 weeks | <24 hours | ↑ 400% faster |
+| **Treatment Adherence** | 71% | ~89% | ↑ 25% |
+| **Time to Success Determination** | 12 weeks | ~3 weeks | ↑ 300% faster |
+| **Data Points per Patient** | ~15 (endpoint) | 1000+ (continuous) | ↑ 6600% richer |
+
+### **Projected Clinical Care Advantages**
+
+✅ **Proactive Intervention**: Detect issues before they escalate (e.g., adherence drop, BP spike)
+✅ **Personalized Engagement**: Smart reminders based on patient behavior patterns
+✅ **Real-Time Efficacy**: Know drug response within days, not months
+✅ **Provider Efficiency**: Automated alerts reduce manual chart reviews by 70%
+✅ **Patient Empowerment**: Transparent dashboard shows progress vs. simulated predictions
+✅ **Ethical**: Minimize patient harm through early detection of non-response
+
+---
 
 ### **Prerequisites**
 - Python 3.11+
