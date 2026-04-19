@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react"
+import { useSimulator } from "@/context/simulator-context"
 import { ArrowDown, FlaskConical, Zap, Loader } from "lucide-react"
 import { SiteNav } from "@/components/site-nav"
 import { LandingFooter } from "@/components/landing/footer"
@@ -29,29 +29,25 @@ const cohortColors: Record<string, string> = {
 }
 
 export default function SimulatorPage() {
-  const [patient, setPatient] = useState<PatientProfile>(patientPresets.highRisk);
-  const [isUploaded, setIsUploaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [simulationData, setSimulationData] = useState<any>(null);
-  const [moaData, setMoaData] = useState<any>(null);
-  const [baselineScore, setBaselineScore] = useState<any>(null);
-  const [requestError, setRequestError] = useState("");
-  const [isReadyForUpload, setIsReadyForUpload] = useState(false);
-
-  const updatePatientField = (field: keyof PatientProfile, value: number) => {
-    setPatient((current) => {
-      if (!Number.isFinite(value)) {
-        return current
-      }
-      return { ...current, [field]: value }
-    })
-  }
-
-  const loadPatientPreset = (preset: keyof typeof patientPresets) => {
-    setPatient(patientPresets[preset])
-    setBaselineScore(null)
-    setRequestError("")
-  }
+  const {
+    patient,
+    isUploaded,
+    setIsUploaded,
+    isLoading,
+    setIsLoading,
+    simulationData,
+    setSimulationData,
+    moaData,
+    setMoaData,
+    baselineScore,
+    setBaselineScore,
+    requestError,
+    setRequestError,
+    isReadyForUpload,
+    setIsReadyForUpload,
+    updatePatientField,
+    loadPatientPreset,
+  } = useSimulator();
 
   const handleBaselineScore = async () => {
     setIsLoading(true)
@@ -112,12 +108,7 @@ export default function SimulatorPage() {
                 <h2 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
                   Baseline profile
                 </h2>
-                  <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-                  These answers replace the old hardcoded patient preset and feed directly into the
-                  backend simulation.
-                </p>
               </div>
-
               <PatientProfileWizard
                 patient={patient}
                 onChange={updatePatientField}
@@ -380,6 +371,29 @@ export default function SimulatorPage() {
             <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground md:text-base">
               {simulationData.explanation_summary || "Gains are driven by significant changes in key physiological parameters based on the mechanism of action."}
             </p>
+          </section>
+
+          {/* New Simulation Upload */}
+          <section className="card-glass relative mt-10 overflow-hidden rounded-3xl p-8 md:p-10 mb-10">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent">
+              / Next Steps
+            </p>
+            <h2 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight md:text-3xl">
+              Run another simulation
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground mb-6">
+              Upload a new clinical trial mechanism-of-action PDF to automatically generate a new digital twin.
+            </p>
+            {isLoading ? (
+              <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 text-primary">
+                <Loader className="h-12 w-12 animate-spin" />
+                <p className="text-center text-xl font-display uppercase tracking-widest text-glow">
+                  Running simulation...
+                </p>
+              </div>
+            ) : (
+              <FileUpload onUploadComplete={handleUploadComplete} />
+            )}
           </section>
         </div>
       </>

@@ -366,7 +366,7 @@ export default function RadialOrbitalTimeline({ timelineData, centerLabel = "Tri
                 </div>
 
                 {isExpanded && (
-                  <Card className="absolute top-28 left-1/2 -translate-x-1/2 w-72 bg-black/92 backdrop-blur-xl border-white/25 shadow-2xl overflow-visible"
+                  <Card className="absolute top-28 left-1/2 -translate-x-1/2 w-72 bg-black/98 backdrop-blur-md border-white/20 shadow-2xl overflow-visible"
                     style={{ boxShadow: `0 20px 60px -10px ${gradient.glow}, 0 0 0 1px oklch(1 0 0 / 0.08)` }}
                   >
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-3 w-px bg-white/50" />

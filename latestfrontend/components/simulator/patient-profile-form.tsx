@@ -90,7 +90,7 @@ const fieldConfigs: FieldConfig[] = [
 type PatientProfileFormProps = {
   patient: PatientProfile
   onChange: (field: FieldName, value: number) => void
-  onLoadPreset: (preset: PresetKey) => void
+  onLoadPreset?: (preset: PresetKey) => void
 }
 
 export function PatientProfileForm({
@@ -100,24 +100,26 @@ export function PatientProfileForm({
 }: PatientProfileFormProps) {
   return (
     <div>
-      <div className="mb-5 flex flex-wrap gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onLoadPreset("highRisk")}
-        >
-          Load high-risk preset
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onLoadPreset("moderateRisk")}
-        >
-          Load moderate-risk preset
-        </Button>
-      </div>
+      {onLoadPreset && (
+        <div className="mb-5 flex flex-wrap gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onLoadPreset("highRisk")}
+          >
+            Load high-risk preset
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onLoadPreset("moderateRisk")}
+          >
+            Load moderate-risk preset
+          </Button>
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {fieldConfigs.map((field) => (
@@ -208,7 +210,7 @@ export function PatientProfileWizard({
   }
 
   const applyPreset = (preset: PresetKey) => {
-    onLoadPreset(preset)
+    onLoadPreset?.(preset)
     setStepIndex(0)
   }
 
@@ -264,20 +266,8 @@ export function PatientProfileWizard({
             </p>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            {summaryItems.map((field) => (
-              <div
-                key={field.name}
-                className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4"
-              >
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground/90">
-                  {field.label}
-                </div>
-                <div className="mt-2 text-base font-medium text-foreground">
-                  {field.kind === "binary" ? (field.value ? "Yes" : "No") : field.value}
-                </div>
-              </div>
-            ))}
+          <div className="mt-4">
+            <PatientProfileForm patient={patient} onChange={onChange} />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

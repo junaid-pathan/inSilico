@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono, Orbitron } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { SmokeBackground } from "@/components/ui/spooky-smoke-animation"
+import { SimulatorProvider } from "@/context/simulator-context"
 import "./globals.css"
 
 const geist = Geist({
@@ -38,11 +39,13 @@ export default function RootLayout({
       className={`${geist.variable} ${geistMono.variable} ${orbitron.variable} bg-background`}
     >
       <body className="font-sans antialiased min-h-screen bg-transparent text-foreground">
-        <div className="fixed inset-0 -z-10 pointer-events-none">
-          <SmokeBackground smokeColor="#FF0000" />
-        </div>
-        {children}
-        {process.env.NODE_ENV === "production" && <Analytics />}
+        <SimulatorProvider>
+          <div className="fixed inset-0 -z-10 pointer-events-none">
+            <SmokeBackground smokeColor="#FF0000" />
+          </div>
+          {children}
+          {process.env.NODE_ENV === "production" && <Analytics />}
+        </SimulatorProvider>
       </body>
     </html>
   )
