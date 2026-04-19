@@ -19,13 +19,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import {
-  adverseEvents,
-  baselineVsTwin,
-  biomarkerRadar,
-  cohortBreakdown,
-  featureImportance,
-} from "@/lib/trial-data"
 
 const tooltipStyle = {
   backgroundColor: "oklch(0.17 0.05 295 / 0.95)",
@@ -36,10 +29,10 @@ const tooltipStyle = {
   fontFamily: "var(--font-geist-mono)",
 }
 
-export function BaselineVsTwinChart() {
+export function BaselineVsTwinChart({ data }: { data: any[] }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <AreaChart data={baselineVsTwin} margin={{ top: 10, right: 12, left: -18, bottom: 0 }}>
+      <AreaChart data={data} margin={{ top: 10, right: 12, left: -18, bottom: 0 }}>
         <defs>
           <linearGradient id="twinGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.8} />
@@ -88,11 +81,11 @@ export function BaselineVsTwinChart() {
   )
 }
 
-export function FeatureImportanceChart() {
+export function FeatureImportanceChart({ data }: { data: any[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart
-        data={featureImportance}
+        data={data}
         layout="vertical"
         margin={{ top: 4, right: 16, left: 0, bottom: 0 }}
       >
@@ -120,13 +113,13 @@ export function FeatureImportanceChart() {
   )
 }
 
-export function CohortPieChart() {
+export function CohortPieChart({ data }: { data: any[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <PieChart>
         <Tooltip contentStyle={tooltipStyle} />
         <Pie
-          data={cohortBreakdown}
+          data={data}
           dataKey="value"
           nameKey="name"
           innerRadius={60}
@@ -134,7 +127,7 @@ export function CohortPieChart() {
           paddingAngle={3}
           stroke="oklch(0.12 0.04 295)"
         >
-          {cohortBreakdown.map((entry) => (
+          {data.map((entry: any) => (
             <Cell key={entry.name} fill={entry.color} />
           ))}
         </Pie>
@@ -147,10 +140,10 @@ export function CohortPieChart() {
   )
 }
 
-export function BiomarkerRadarChart() {
+export function BiomarkerRadarChart({ data }: { data: any[] }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <RadarChart data={biomarkerRadar} outerRadius={100}>
+      <RadarChart data={data} outerRadius={100}>
         <PolarGrid stroke="oklch(0.3 0.06 295 / 0.4)" />
         <PolarAngleAxis
           dataKey="biomarker"
@@ -178,10 +171,10 @@ export function BiomarkerRadarChart() {
   )
 }
 
-export function AdverseEventsChart() {
+export function AdverseEventsChart({ data }: { data: any[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={adverseEvents} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>
+      <BarChart data={data} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>
         <CartesianGrid stroke="oklch(0.3 0.06 295 / 0.25)" strokeDasharray="3 3" />
         <XAxis dataKey="day" stroke="oklch(0.72 0.04 295)" fontSize={11} tickLine={false} axisLine={false} />
         <YAxis stroke="oklch(0.72 0.04 295)" fontSize={11} tickLine={false} axisLine={false} />

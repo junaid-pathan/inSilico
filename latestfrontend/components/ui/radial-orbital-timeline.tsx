@@ -98,10 +98,10 @@ export default function RadialOrbitalTimeline({ timelineData, centerLabel = "Tri
     const angle = ((index / total) * 360 + rotationAngle) % 360
     const radius = 220
     const radian = (angle * Math.PI) / 180
-    const x = radius * Math.cos(radian)
-    const y = radius * Math.sin(radian)
+    const x = Number((radius * Math.cos(radian)).toFixed(3))
+    const y = Number((radius * Math.sin(radian)).toFixed(3))
     const zIndex = Math.round(100 + 50 * Math.cos(radian))
-    const opacity = Math.max(0.4, Math.min(1, 0.4 + 0.6 * ((1 + Math.sin(radian)) / 2)))
+    const opacity = Number(Math.max(0.4, Math.min(1, 0.4 + 0.6 * ((1 + Math.sin(radian)) / 2))).toFixed(3))
     return { x, y, angle, zIndex, opacity }
   }
 
@@ -182,6 +182,7 @@ export default function RadialOrbitalTimeline({ timelineData, centerLabel = "Tri
                 }}
                 className="absolute transition-all duration-700 cursor-pointer"
                 style={nodeStyle}
+                suppressHydrationWarning
                 onClick={(e) => {
                   e.stopPropagation()
                   toggleItem(item.id)

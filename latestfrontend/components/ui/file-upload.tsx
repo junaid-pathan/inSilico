@@ -9,7 +9,9 @@ import {
   Trash2,
   Loader,
   CheckCircle,
+  AlertCircle,
 } from "lucide-react";
+import { parseTrialPdf } from "@/lib/api";
  
 interface FileWithPreview {
   id: string;
@@ -22,7 +24,7 @@ interface FileWithPreview {
   file?: File;
 }
  
-export default function FileUpload({ onUploadComplete }: { onUploadComplete?: () => void }) {
+export default function FileUpload({ onUploadComplete }: { onUploadComplete?: (data?: any) => void }) {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,29 +42,49 @@ export default function FileUpload({ onUploadComplete }: { onUploadComplete?: ()
       file,
     }));
     setFiles((prev) => [...prev, ...newFiles]);
-    newFiles.forEach((f) => simulateUpload(f.id));
+    newFiles.forEach((f) => simulateUpload(f.id, f.file));
   };
  
-  // Simulate upload progress
-  const simulateUpload = (id: string) => {
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Process upload with backend
+  const simulateUpload = async (id: string, file?: File) => {
+    if (!file) return;
+
     let progress = 0;
     const interval = setInterval(() => {
-      progress += Math.random() * 15;
+      progress += Math.random() * 10;
+      if (progress > 90) progress = 90;
       setFiles((prev) =>
         prev.map((f) =>
-          f.id === id ? { ...f, progress: Math.min(progress, 100) } : f,
+          f.id === id ? { ...f, progress } : f,
         ),
       );
-      if (progress >= 100) {
-        clearInterval(interval);
-        if (navigator.vibrate) navigator.vibrate(100);
-        
-        // Notify parent that upload is complete after a brief delay to show 100% state
-        if (onUploadComplete) {
-            setTimeout(() => onUploadComplete(), 1000);
-        }
-      }
     }, 300);
+
+    try {
+      setUploadError(null);
+      const data = await parseTrialPdf(file);
+      
+      clearInterval(interval);
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === id ? { ...f, progress: 100 } : f,
+        ),
+      );
+      if (navigator.vibrate) navigator.vibrate(100);
+      
+      if (onUploadComplete) {
+          setTimeout(() => onUploadComplete(data), 1000);
+      }
+    } catch (err: any) {
+      clearInterval(interval);
+      console.error(err);
+      setUploadError(err.message || "Upload failed");
+      setFiles((prev) =>
+        prev.filter((f) => f.id !== id),
+      );
+    }
   };
  
   const onDrop = (e: DragEvent) => {
@@ -174,11 +196,18 @@ export default function FileUpload({ onUploadComplete }: { onUploadComplete?: ()
             multiple
             hidden
             onChange={onSelect}
-            accept="image/*,application/pdf,video/*,audio/*,text/*,application/zip"
+            accept="application/pdf"
           />
         </div>
       </motion.div>
- 
+      
+      {uploadError && (
+        <div className="mt-4 p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p className="text-sm">{uploadError}</p>
+        </div>
+      )}
+
       {/* Uploaded files list */}
       <div className="mt-8">
         <AnimatePresence>
