@@ -20,6 +20,14 @@ import {
   YAxis,
 } from "recharts"
 
+const baselineColor = "oklch(0.72 0.2 25)"
+const baselineFill = "oklch(0.72 0.2 25 / 0.18)"
+const twinColor = "oklch(0.78 0.16 190)"
+const twinFill = "oklch(0.78 0.16 190 / 0.22)"
+const mildColor = "oklch(0.76 0.14 190)"
+const moderateColor = "oklch(0.78 0.16 95)"
+const severeColor = "oklch(0.68 0.22 25)"
+
 const tooltipStyle = {
   backgroundColor: "oklch(0.17 0.05 295 / 0.95)",
   border: "1px solid oklch(0.65 0.26 310 / 0.4)",
@@ -29,18 +37,45 @@ const tooltipStyle = {
   fontFamily: "var(--font-geist-mono)",
 }
 
+function roundDomainValue(value: number, direction: "down" | "up") {
+  const rounded = direction === "down" ? Math.floor(value) : Math.ceil(value)
+  return Math.max(0, Math.min(100, rounded))
+}
+
+function getTrajectoryDomain(data: Array<{ baseline: number; twin: number }>) {
+  const values = data.flatMap((point) => [point.baseline, point.twin]).filter((value) => Number.isFinite(value))
+  if (values.length === 0) {
+    return [0, 100] as const
+  }
+
+  const minValue = Math.min(...values)
+  const maxValue = Math.max(...values)
+  const spread = maxValue - minValue
+  const minRange = 6
+  const padding = Math.max(spread * 0.35, 1)
+  const center = (minValue + maxValue) / 2
+  const halfRange = Math.max((spread / 2) + padding, minRange / 2)
+
+  return [
+    roundDomainValue(center - halfRange, "down"),
+    roundDomainValue(center + halfRange, "up"),
+  ] as const
+}
+
 export function BaselineVsTwinChart({ data }: { data: any[] }) {
+  const [domainMin, domainMax] = getTrajectoryDomain(data)
+
   return (
     <ResponsiveContainer width="100%" height={280}>
       <AreaChart data={data} margin={{ top: 10, right: 12, left: -18, bottom: 0 }}>
         <defs>
           <linearGradient id="twinGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.8} />
-            <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
+            <stop offset="0%" stopColor={twinFill} stopOpacity={0.95} />
+            <stop offset="100%" stopColor={twinFill} stopOpacity={0} />
           </linearGradient>
           <linearGradient id="baseGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--chart-2)" stopOpacity={0.5} />
-            <stop offset="100%" stopColor="var(--chart-2)" stopOpacity={0} />
+            <stop offset="0%" stopColor={baselineFill} stopOpacity={0.9} />
+            <stop offset="100%" stopColor={baselineFill} stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid stroke="oklch(0.3 0.06 295 / 0.3)" strokeDasharray="3 3" />
@@ -57,23 +92,34 @@ export function BaselineVsTwinChart({ data }: { data: any[] }) {
           tickLine={false}
           axisLine={false}
           unit="%"
+          domain={[domainMin, domainMax]}
+          tickCount={6}
+          allowDataOverflow
         />
-        <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: "var(--chart-1)", strokeOpacity: 0.3 }} />
+        <Tooltip
+          contentStyle={tooltipStyle}
+          cursor={{ stroke: twinColor, strokeOpacity: 0.28 }}
+          formatter={(value: number, name: string) => [`${value.toFixed(1)}%`, name]}
+        />
         <Area
           type="monotone"
           dataKey="baseline"
-          stroke="var(--chart-2)"
+          stroke={baselineColor}
           strokeWidth={2}
           fill="url(#baseGrad)"
           name="Baseline"
+          dot={{ r: 3, fill: baselineColor, strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: baselineColor, stroke: "white", strokeWidth: 1.5 }}
         />
         <Area
           type="monotone"
           dataKey="twin"
-          stroke="var(--chart-1)"
-          strokeWidth={2.5}
+          stroke={twinColor}
+          strokeWidth={2.75}
           fill="url(#twinGrad)"
           name="Trial twin"
+          dot={{ r: 3, fill: twinColor, strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: twinColor, stroke: "white", strokeWidth: 1.5 }}
         />
         <Legend wrapperStyle={{ fontSize: 11, fontFamily: "var(--font-geist-mono)" }} />
       </AreaChart>
@@ -153,16 +199,16 @@ export function BiomarkerRadarChart({ data }: { data: any[] }) {
         <Radar
           name="Baseline"
           dataKey="baseline"
-          stroke="var(--chart-2)"
-          fill="var(--chart-2)"
-          fillOpacity={0.25}
+          stroke={baselineColor}
+          fill={baselineColor}
+          fillOpacity={0.18}
         />
         <Radar
           name="Trial twin"
           dataKey="twin"
-          stroke="var(--chart-1)"
-          fill="var(--chart-1)"
-          fillOpacity={0.35}
+          stroke={twinColor}
+          fill={twinColor}
+          fillOpacity={0.28}
         />
         <Legend wrapperStyle={{ fontSize: 11, fontFamily: "var(--font-geist-mono)" }} />
         <Tooltip contentStyle={tooltipStyle} />
@@ -180,9 +226,9 @@ export function AdverseEventsChart({ data }: { data: any[] }) {
         <YAxis stroke="oklch(0.72 0.04 295)" fontSize={11} tickLine={false} axisLine={false} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "oklch(0.65 0.26 310 / 0.08)" }} />
         <Legend wrapperStyle={{ fontSize: 11, fontFamily: "var(--font-geist-mono)" }} />
-        <Bar dataKey="mild" stackId="a" fill="var(--chart-3)" radius={[0, 0, 0, 0]} />
-        <Bar dataKey="moderate" stackId="a" fill="var(--chart-4)" />
-        <Bar dataKey="severe" stackId="a" fill="var(--chart-2)" radius={[6, 6, 0, 0]} />
+        <Bar dataKey="mild" stackId="a" fill={mildColor} radius={[0, 0, 0, 0]} />
+        <Bar dataKey="moderate" stackId="a" fill={moderateColor} />
+        <Bar dataKey="severe" stackId="a" fill={severeColor} radius={[6, 6, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   )

@@ -14,7 +14,6 @@ import {
   CohortPieChart,
   FeatureImportanceChart,
 } from "@/components/data/trial-charts"
-import { adverseEvents, biomarkerRadar, cohortBreakdown } from "@/lib/trial-data"
 import { simulateTrial } from "@/lib/api"
 
 const patientPreset = {
@@ -31,6 +30,13 @@ const patientPreset = {
   MentHlth: 7,
   Age: 9,
 };
+
+const cohortColors: Record<string, string> = {
+  Responders: "var(--chart-1)",
+  Partial: "var(--chart-5)",
+  "No effect": "var(--chart-3)",
+  Adverse: "var(--chart-2)",
+}
 
 export default function SimulatorPage() {
   const [isUploaded, setIsUploaded] = useState(false);
@@ -83,16 +89,25 @@ export default function SimulatorPage() {
 
   // Map feature deltas
   const featureDeltas = simulationData.feature_deltas || [];
+  const biomarkerRadar = simulationData.biomarker_radar || [];
+  const adverseEvents = simulationData.adverse_events || [];
+  const cohortBreakdown = (simulationData.cohort_breakdown || []).map((entry: any) => ({
+    ...entry,
+    color: cohortColors[entry.name] || "var(--chart-3)",
+  }));
+  const cohortSize = simulationData.cohort_size || cohortBreakdown.reduce((sum: number, item: any) => sum + Number(item.value || 0), 0);
+  const confidenceScore = Number.isFinite(simulationData.confidence_score) ? simulationData.confidence_score : null;
 
   // Generate baseline vs twin interpolation
   const baseline_score = simulationData.baseline_score * 100;
   const trial_score = simulationData.trial_score * 100;
+  const improvementPoints = baseline_score - trial_score;
   const baselineVsTwin = [
     { label: "Wk 0", baseline: baseline_score, twin: baseline_score },
-    { label: "Wk 4", baseline: baseline_score - 0.5, twin: baseline_score - (baseline_score - trial_score) * 0.2 },
-    { label: "Wk 8", baseline: baseline_score - 1.0, twin: baseline_score - (baseline_score - trial_score) * 0.5 },
-    { label: "Wk 12", baseline: baseline_score - 1.5, twin: baseline_score - (baseline_score - trial_score) * 0.75 },
-    { label: "Wk 24", baseline: baseline_score - 2.5, twin: trial_score },
+    { label: "Wk 4", baseline: baseline_score, twin: baseline_score - (improvementPoints * 0.2) },
+    { label: "Wk 8", baseline: baseline_score, twin: baseline_score - (improvementPoints * 0.45) },
+    { label: "Wk 12", baseline: baseline_score, twin: baseline_score - (improvementPoints * 0.7) },
+    { label: "Wk 24", baseline: baseline_score, twin: trial_score },
   ];
 
   const keyMetrics = [
@@ -100,8 +115,8 @@ export default function SimulatorPage() {
     { label: "Trial twin risk", value: `${trial_score.toFixed(1)}%`, tone: "good" as const, delta: `−${(baseline_score - trial_score).toFixed(1)} pts` },
     { label: "Predicted Δ", value: `+${(baseline_score - trial_score).toFixed(1)}`, tone: "good" as const, delta: "pts improvement" },
     { label: "Gamma", value: simulationData.gamma?.toFixed(2) || "0.42", tone: "primary" as const, delta: moaData?.drug_name || "GLP-1 demo" },
-    { label: "Cohort N", value: "720", tone: "neutral" as const, delta: "digital twins" },
-    { label: "Confidence", value: "94.1%", tone: "primary" as const, delta: "5-fold CV" },
+    { label: "Cohort N", value: `${cohortSize}`, tone: "neutral" as const, delta: "simulated twins" },
+    { label: "Confidence", value: confidenceScore !== null ? `${confidenceScore.toFixed(1)}%` : "n/a", tone: "primary" as const, delta: "cohort-derived" },
   ];
 
   return (
@@ -157,7 +172,7 @@ export default function SimulatorPage() {
                 </h2>
               </div>
               <p className="text-xs text-muted-foreground">
-                Risk score (%) over the simulated protocol window
+                Interpolated risk score (%) from the simulated start/end states
               </p>
             </div>
             <BaselineVsTwinChart data={baselineVsTwin} />
@@ -189,7 +204,7 @@ export default function SimulatorPage() {
                 Response breakdown
               </h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                N = 720 digital twins
+                N = {cohortSize} simulated twins
               </p>
               <div className="mt-4">
                 <CohortPieChart data={cohortBreakdown} />
@@ -201,10 +216,10 @@ export default function SimulatorPage() {
           <div className="mt-6 grid gap-6 lg:grid-cols-5">
             <section className="card-glass col-span-1 rounded-3xl p-6 lg:col-span-2">
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">
-                / Biomarkers
+                / Feature profile
               </p>
               <h2 className="font-display mt-2 text-xl font-bold uppercase tracking-tight md:text-2xl">
-                Multi-axis read-out
+                Model read-out
               </h2>
               <div className="mt-4">
                 <BiomarkerRadarChart data={biomarkerRadar} />
@@ -272,20 +287,20 @@ export default function SimulatorPage() {
                   / Safety
                 </p>
                 <h2 className="font-display mt-2 text-xl font-bold uppercase tracking-tight md:text-2xl">
-                  Adverse event surveillance · 7d
+                  Simulated tolerability signals · 7d
                 </h2>
               </div>
               <div className="flex items-center gap-3 text-xs">
                 <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "var(--chart-3)" }} />
+                  <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.76 0.14 190)" }} />
                   Mild
                 </span>
                 <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "var(--chart-4)" }} />
+                  <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.78 0.16 95)" }} />
                   Moderate
                 </span>
                 <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "var(--chart-2)" }} />
+                  <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.68 0.22 25)" }} />
                   Severe
                 </span>
               </div>
