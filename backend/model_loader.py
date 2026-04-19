@@ -182,7 +182,10 @@ def _visible_feature_importances(state: Dict[str, Any]) -> Dict[str, float]:
     intervention simulator.
     """
     importances = dict(state["feature_importances"])
-    mutable = set(state["context"].intervention_mutable_columns)
+    mutable_attr = getattr(state["context"], "intervention_mutable_columns", None)
+    if not mutable_attr:
+        return importances
+    mutable = set(mutable_attr)
     filtered = {feature: value for feature, value in importances.items() if feature in mutable}
     return filtered or importances
 
