@@ -10,6 +10,11 @@ try:
 except ImportError:  # pragma: no cover
     joblib = None
 
+try:
+    import shap
+except ImportError:  # pragma: no cover
+    shap = None
+
 from trialforge_moa import DrugMoAInput
 from trialforge_simulation import (
     SimulationContext,
@@ -190,6 +195,128 @@ def _visible_feature_importances(state: Dict[str, Any]) -> Dict[str, float]:
     return filtered or importances
 
 
+def _normalize_shap_output(values: Any, expected_value: Any) -> tuple[Any, float]:
+    import numpy as np
+
+    shap_values = values
+    if isinstance(shap_values, list):
+        normalized = np.asarray(shap_values[1], dtype=float)
+    else:
+        normalized = np.asarray(shap_values, dtype=float)
+        if normalized.ndim == 3:
+            normalized = normalized[:, :, 1]
+
+    expected = expected_value
+    if isinstance(expected, list):
+        expected = expected[1]
+    elif hasattr(expected, "shape") and getattr(expected, "shape", ()):
+        expected = np.asarray(expected, dtype=float).reshape(-1)[-1]
+
+    return normalized, float(expected)
+
+
+@lru_cache(maxsize=1)
+def _load_shap_explainer() -> Any | None:
+    state = load_backend_state()
+    risk_model = state["risk_model"]
+    if risk_model is None or shap is None:
+        return None
+
+    try:
+        return shap.TreeExplainer(risk_model)
+    except Exception:
+        return None
+
+
+def build_local_shap_payload(
+    baseline_features: Dict[str, float],
+    trial_twin_features: Dict[str, float],
+    risk_model: Any | None,
+    mutable_features: list[str] | None = None,
+    top_k: int = 10,
+) -> Dict[str, Any] | None:
+    if risk_model is None:
+        return None
+
+    explainer = _load_shap_explainer()
+    if explainer is None:
+        return None
+
+    import pandas as pd
+
+    feature_frame = pd.DataFrame([baseline_features, trial_twin_features])
+
+    try:
+        shap_values, expected_value = _normalize_shap_output(
+            explainer.shap_values(feature_frame),
+            explainer.expected_value,
+        )
+    except Exception:
+        return None
+
+    baseline_prediction = float(risk_model.predict_proba(feature_frame.iloc[[0]])[0, 1])
+    trial_prediction = float(risk_model.predict_proba(feature_frame.iloc[[1]])[0, 1])
+
+    baseline_entries = []
+    trial_entries = []
+    delta_entries = []
+    mutable_set = set(mutable_features or [])
+
+    for index, feature in enumerate(feature_frame.columns):
+        baseline_value = float(feature_frame.iloc[0, index])
+        trial_value = float(feature_frame.iloc[1, index])
+        baseline_shap = float(shap_values[0, index])
+        trial_shap = float(shap_values[1, index])
+        shap_delta = trial_shap - baseline_shap
+
+        baseline_entries.append(
+            {
+                "feature": feature,
+                "value": baseline_value,
+                "shap_value": baseline_shap,
+                "abs_shap": abs(baseline_shap),
+            }
+        )
+        trial_entries.append(
+            {
+                "feature": feature,
+                "value": trial_value,
+                "shap_value": trial_shap,
+                "abs_shap": abs(trial_shap),
+            }
+        )
+        delta_entries.append(
+            {
+                "feature": feature,
+                "baseline_value": baseline_value,
+                "trial_twin_value": trial_value,
+                "baseline_shap": baseline_shap,
+                "trial_twin_shap": trial_shap,
+                "shap_delta": shap_delta,
+                "abs_delta": abs(shap_delta),
+            }
+        )
+
+    baseline_entries.sort(key=lambda item: item["abs_shap"], reverse=True)
+    trial_entries.sort(key=lambda item: item["abs_shap"], reverse=True)
+    delta_entries.sort(key=lambda item: item["abs_delta"], reverse=True)
+
+    filtered_delta = [item for item in delta_entries if item["abs_delta"] > 1e-6]
+    if mutable_set:
+        mutable_delta = [item for item in filtered_delta if item["feature"] in mutable_set]
+        if mutable_delta:
+            filtered_delta = mutable_delta
+
+    return {
+        "expected_value": expected_value,
+        "baseline_prediction": baseline_prediction,
+        "trial_twin_prediction": trial_prediction,
+        "baseline": baseline_entries[:top_k],
+        "trial_twin": trial_entries[:top_k],
+        "delta": filtered_delta[:top_k],
+    }
+
+
 def _load_optional_joblib(path: Path) -> Any | None:
     if not path.exists() or joblib is None:
         return None
@@ -250,6 +377,12 @@ def simulate_payload(patient: Dict[str, float], moa_info: DrugMoAInput) -> Dict[
     )
     result["mode"] = state["mode"]
     result["feature_importances"] = _visible_feature_importances(state)
+    result["local_shap"] = build_local_shap_payload(
+        result["baseline_features"],
+        result["trial_twin_features"],
+        state["risk_model"],
+        mutable_features=list(getattr(state["context"], "intervention_mutable_columns", []) or []),
+    )
     result["explanation_summary"] = build_explanation_summary(result["feature_deltas"], moa_info)
     result["demo_patient"] = state["demo_patient"]
     return result
