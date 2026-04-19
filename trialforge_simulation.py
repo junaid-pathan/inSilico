@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 import numpy as np
@@ -19,15 +19,50 @@ class SimulationContext:
     healthy_mu: Dict[str, float]
     disease_mu: Dict[str, float]
     recovery_vector: Dict[str, float]
+    intervention_mutable_columns: List[str] = field(default_factory=list)
+    immutable_columns: List[str] = field(default_factory=list)
     default_gamma: float = 0.30
+
+    def __post_init__(self) -> None:
+        if not self.intervention_mutable_columns:
+            self.intervention_mutable_columns = infer_intervention_mutable_columns(self.feature_columns)
+        if not self.immutable_columns:
+            mutable = set(self.intervention_mutable_columns)
+            self.immutable_columns = [column for column in self.feature_columns if column not in mutable]
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
 
+def infer_intervention_mutable_columns(feature_columns: Iterable[str]) -> List[str]:
+    mutable_candidates = [
+        "HighBP",
+        "HighChol",
+        "BMI",
+        "PhysActivity",
+        "Fruits",
+        "Veggies",
+        "GenHlth",
+        "MentHlth",
+        "PhysHlth",
+        "DiffWalk",
+        "Smoker",
+        "HvyAlcoholConsump",
+    ]
+    available = set(feature_columns)
+    return [column for column in mutable_candidates if column in available]
+
+
+def infer_immutable_columns(feature_columns: Iterable[str]) -> List[str]:
+    mutable = set(infer_intervention_mutable_columns(feature_columns))
+    return [column for column in feature_columns if column not in mutable]
+
+
 def build_simulation_context(
     train_df: pd.DataFrame,
     feature_columns: Optional[Iterable[str]] = None,
+    intervention_mutable_columns: Optional[Iterable[str]] = None,
+    immutable_columns: Optional[Iterable[str]] = None,
     default_gamma: float = 0.30,
 ) -> SimulationContext:
     if "target" not in train_df.columns:
@@ -64,6 +99,10 @@ def build_simulation_context(
         healthy_mu=healthy_mu.to_dict(),
         disease_mu=disease_mu.to_dict(),
         recovery_vector=recovery_vector.to_dict(),
+        intervention_mutable_columns=list(
+            intervention_mutable_columns or infer_intervention_mutable_columns(feature_columns)
+        ),
+        immutable_columns=list(immutable_columns or infer_immutable_columns(feature_columns)),
         default_gamma=default_gamma,
     )
 
@@ -108,10 +147,19 @@ def simulate_trial_twin(
     mean = pd.Series(context.training_mean)
     std = pd.Series(context.training_std)
     recovery = pd.Series(context.recovery_vector)
+    mutable_columns = set(context.intervention_mutable_columns)
+
+    for column in recovery.index:
+        if column not in mutable_columns:
+            recovery[column] = 0.0
 
     scaled_patient = (patient_features - mean) / std
     scaled_twin = scaled_patient + (gamma_value * recovery)
     raw_twin = (scaled_twin * std) + mean
+
+    for column in context.immutable_columns:
+        if column in raw_twin.index and column in patient_features.index:
+            raw_twin[column] = patient_features[column]
 
     return project_row_to_valid_support(raw_twin, context)
 
