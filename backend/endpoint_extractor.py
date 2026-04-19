@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 import google.generativeai as genai
 
 
-EXTRACTION_MODEL = "gemini-2.0-flash"
+EXTRACTION_MODEL = "gemini-2.5-flash"
 
 EXTRACTION_PROMPT = """You are a clinical-trial analyst. Given the excerpts below from a trial document, extract measurable endpoints as a JSON object.
 

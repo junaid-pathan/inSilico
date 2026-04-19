@@ -12,7 +12,7 @@ from backend.gamma_formula import compute_gamma, have_enough_signal
 from backend.rag_pipeline import RagError, RetrievedEvidence, run_rag_over_pdf
 
 
-FALLBACK_MODEL = "gemini-2.0-flash"
+FALLBACK_MODEL = "gemini-2.5-flash"
 
 FALLBACK_PROMPT = """You are a clinical-trial analyst. The attached PDF is a trial document.
 

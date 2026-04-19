@@ -57,6 +57,12 @@ export async function scorePatient(patient) {
   };
 }
 
+export async function parseTrialPdf(_file) {
+  throw new Error(
+    "PDF parsing requires the live backend. Set VITE_API_MODE=backend and run the FastAPI server."
+  );
+}
+
 export async function simulateTrial(patient, moa) {
   const gamma = clamp(moa.gamma ?? 0.3, 0, 1);
   const trialTwin = buildTwin(patient, gamma);

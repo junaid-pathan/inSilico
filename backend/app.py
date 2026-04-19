@@ -56,7 +56,7 @@ app = FastAPI(title="TrialForge Backend", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -86,14 +86,26 @@ def simulate_trial_endpoint(request: SimulateTrialRequest) -> Dict[str, Any]:
 
 @app.post("/parse-trial-pdf")
 async def parse_trial_pdf_endpoint(file: UploadFile = File(...)) -> Dict[str, Any]:
+    # Always return 200 with an error payload on failure so the browser can
+    # actually read the detail (avoids CORS swallowing the response).
     if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF uploads are supported.")
+        return {"error": True, "detail": "Only PDF uploads are supported."}
 
     pdf_bytes = await file.read()
     if not pdf_bytes:
-        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+        return {"error": True, "detail": "Uploaded file is empty."}
 
     try:
         return parse_trial_pdf(pdf_bytes)
-    except PdfParseError as exc:
-        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except Exception as exc:
+        import traceback
+        tb = traceback.format_exc()
+        print("=" * 60, flush=True)
+        print("PDF PARSE EXCEPTION:", flush=True)
+        print(tb, flush=True)
+        print("=" * 60, flush=True)
+        return {
+            "error": True,
+            "detail": f"{type(exc).__name__}: {exc}",
+            "traceback": tb,
+        }

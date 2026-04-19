@@ -137,6 +137,11 @@ export default function DrugComposer({ moa, onChange, onLoadDemo }) {
 
     try {
       const parsed = await api.parseTrialPdf(file);
+      if (parsed?.error) {
+        setPdfStatus({ state: "error", message: parsed.detail ?? "Backend error" });
+        console.error("Backend error detail:", parsed);
+        return;
+      }
       onLoadDemo(pickMoaFields(parsed));
       setLastParsed(parsed);
       const modeLabel = parsed.mode === "pdf_formula" ? "formula" : "LLM guess";
