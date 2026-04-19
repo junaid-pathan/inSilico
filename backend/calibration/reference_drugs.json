@@ -1,0 +1,85 @@
+{
+  "description": "Ground-truth endpoints and target gamma for well-known diabetes interventions. Used for (optional) regression calibration. Sources in comments; numbers are representative literature medians.",
+  "drugs": [
+    {
+      "drug_name": "Semaglutide 1.0 mg (SUSTAIN-6)",
+      "delta_hba1c_percent": -1.4,
+      "delta_weight_kg": -4.3,
+      "delta_sbp_mmhg": -2.6,
+      "relative_risk_reduction": 0.26,
+      "target_gamma": 0.45
+    },
+    {
+      "drug_name": "Semaglutide 2.4 mg (STEP-1 obesity)",
+      "delta_hba1c_percent": -0.5,
+      "delta_weight_kg": -14.9,
+      "delta_sbp_mmhg": -6.2,
+      "relative_risk_reduction": 0.40,
+      "target_gamma": 0.55
+    },
+    {
+      "drug_name": "Tirzepatide 15 mg (SURPASS-2)",
+      "delta_hba1c_percent": -2.3,
+      "delta_weight_kg": -11.2,
+      "delta_sbp_mmhg": -5.8,
+      "relative_risk_reduction": 0.55,
+      "target_gamma": 0.68
+    },
+    {
+      "drug_name": "Liraglutide 1.8 mg (LEADER)",
+      "delta_hba1c_percent": -1.1,
+      "delta_weight_kg": -2.3,
+      "delta_sbp_mmhg": -1.2,
+      "relative_risk_reduction": 0.22,
+      "target_gamma": 0.38
+    },
+    {
+      "drug_name": "Empagliflozin 25 mg (EMPA-REG)",
+      "delta_hba1c_percent": -0.6,
+      "delta_weight_kg": -2.0,
+      "delta_sbp_mmhg": -4.5,
+      "relative_risk_reduction": 0.14,
+      "target_gamma": 0.28
+    },
+    {
+      "drug_name": "Metformin 1500 mg (DPP)",
+      "delta_hba1c_percent": -0.4,
+      "delta_weight_kg": -2.1,
+      "delta_sbp_mmhg": -1.0,
+      "relative_risk_reduction": 0.31,
+      "target_gamma": 0.30
+    },
+    {
+      "drug_name": "DPP lifestyle intervention",
+      "delta_hba1c_percent": -0.3,
+      "delta_weight_kg": -5.6,
+      "delta_sbp_mmhg": -3.0,
+      "relative_risk_reduction": 0.58,
+      "target_gamma": 0.42
+    },
+    {
+      "drug_name": "Pioglitazone 45 mg (PROactive)",
+      "delta_hba1c_percent": -0.8,
+      "delta_weight_kg": 3.6,
+      "delta_sbp_mmhg": -1.5,
+      "relative_risk_reduction": 0.10,
+      "target_gamma": 0.22
+    },
+    {
+      "drug_name": "Sitagliptin 100 mg",
+      "delta_hba1c_percent": -0.7,
+      "delta_weight_kg": -0.2,
+      "delta_sbp_mmhg": -1.0,
+      "relative_risk_reduction": 0.05,
+      "target_gamma": 0.18
+    },
+    {
+      "drug_name": "Roux-en-Y bariatric surgery",
+      "delta_hba1c_percent": -2.8,
+      "delta_weight_kg": -32.0,
+      "delta_sbp_mmhg": -9.0,
+      "relative_risk_reduction": 0.80,
+      "target_gamma": 0.80
+    }
+  ]
+}

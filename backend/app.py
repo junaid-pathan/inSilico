@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import FastAPI
+from dotenv import load_dotenv
+
+# Load .env from the project root before any module reads GEMINI_API_KEY.
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from backend.model_loader import load_backend_state, score_patient_payload, simulate_payload
+from backend.pdf_parser import PdfParseError, parse_trial_pdf
 from trialforge_moa import DrugMoAInput
 
 
@@ -75,3 +82,18 @@ def score_patient_endpoint(request: ScorePatientRequest) -> Dict[str, Any]:
 def simulate_trial_endpoint(request: SimulateTrialRequest) -> Dict[str, Any]:
     moa = DrugMoAInput.from_dict(request.moa.model_dump())
     return simulate_payload(request.patient.model_dump(), moa)
+
+
+@app.post("/parse-trial-pdf")
+async def parse_trial_pdf_endpoint(file: UploadFile = File(...)) -> Dict[str, Any]:
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF uploads are supported.")
+
+    pdf_bytes = await file.read()
+    if not pdf_bytes:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    try:
+        return parse_trial_pdf(pdf_bytes)
+    except PdfParseError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc

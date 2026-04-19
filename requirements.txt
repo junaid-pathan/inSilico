@@ -1,10 +1,15 @@
+chromadb
 fastapi
+google-generativeai
 joblib
 kagglehub
 matplotlib
 numpy
 pandas
 pydantic
+pypdf
+python-dotenv
+python-multipart
 scikit-learn
 scipy
 sdv

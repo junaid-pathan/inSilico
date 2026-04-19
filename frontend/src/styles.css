@@ -333,6 +333,63 @@ button {
   }
 }
 
+.pdf-status {
+  margin: 0;
+  font-size: 0.88rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #334155;
+}
+.pdf-status--loading { background: #e0f2fe; color: #075985; }
+.pdf-status--ok { background: #dcfce7; color: #166534; }
+.pdf-status--error { background: #fee2e2; color: #991b1b; }
+
+.evidence-panel {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 0.88rem;
+}
+.evidence-header {
+  margin-bottom: 0.6rem;
+}
+.mode-pill {
+  display: inline-block;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.mode-pill--ok { background: #dcfce7; color: #166534; }
+.mode-pill--warn { background: #fef3c7; color: #92400e; }
+.mode-reason { color: #64748b; margin-left: 0.35rem; font-size: 0.8rem; }
+
+.evidence-section {
+  margin-top: 0.6rem;
+}
+.evidence-section > summary {
+  cursor: pointer;
+  list-style: revert;
+}
+.evidence-list {
+  margin: 0.3rem 0 0;
+  padding-left: 1.1rem;
+  line-height: 1.45;
+}
+.evidence-list--quotes li {
+  color: #475569;
+  font-style: italic;
+}
+.evidence-list--chunks li {
+  color: #334155;
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+}
+
 @media (max-width: 720px) {
   .hero,
   .section-card__header {

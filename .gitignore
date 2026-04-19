@@ -2,4 +2,9 @@ frontend/node_modules/
 frontend/dist/
 __pycache__/
 *.pyc
-/Users/rudra/Documents/Hackathons/Priceton/trialforge/frontend/.env
+.env
+.env.local
+backend/.env
+frontend/.env
+frontend/.env.local
+.claude/

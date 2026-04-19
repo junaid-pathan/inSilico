@@ -1,0 +1,19 @@
+{
+  "version": "2026-04-18.v1",
+  "source": "hand-seeded from published trial outcomes (SUSTAIN, STEP, SURPASS, DPP, UKPDS, LEADER, EMPA-REG)",
+  "normalization": {
+    "delta_hba1c_percent": {"scale_abs": 2.5, "direction": "negative_is_good"},
+    "delta_weight_kg": {"scale_abs": 15.0, "direction": "negative_is_good"},
+    "delta_weight_percent": {"scale_abs": 20.0, "direction": "negative_is_good"},
+    "delta_sbp_mmhg": {"scale_abs": 15.0, "direction": "negative_is_good"},
+    "relative_risk_reduction": {"scale_abs": 1.0, "direction": "positive_is_good"}
+  },
+  "weights": {
+    "hba1c": 0.32,
+    "weight": 0.30,
+    "sbp": 0.08,
+    "rrr": 0.30
+  },
+  "intercept": 0.05,
+  "bounds": {"min": 0.05, "max": 0.85}
+}
