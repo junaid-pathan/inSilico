@@ -172,6 +172,21 @@ def _hydrate_patient_features(state: Dict[str, Any], patient: Dict[str, float]) 
     return hydrated
 
 
+def _visible_feature_importances(state: Dict[str, Any]) -> Dict[str, float]:
+    """
+    Keep explainability bars aligned with the intervention logic.
+
+    The raw exported feature importances can include immutable or structural
+    variables such as Age, Income, and Education. For the product UI we only
+    want to surface features that are actually allowed to move under the
+    intervention simulator.
+    """
+    importances = dict(state["feature_importances"])
+    mutable = set(state["context"].intervention_mutable_columns)
+    filtered = {feature: value for feature, value in importances.items() if feature in mutable}
+    return filtered or importances
+
+
 def _load_optional_joblib(path: Path) -> Any | None:
     if not path.exists() or joblib is None:
         return None
@@ -217,7 +232,7 @@ def score_patient_payload(patient: Dict[str, float]) -> Dict[str, Any]:
     return {
         "mode": state["mode"],
         "risk_score": risk_score,
-        "feature_importances": state["feature_importances"],
+        "feature_importances": _visible_feature_importances(state),
     }
 
 
@@ -231,7 +246,7 @@ def simulate_payload(patient: Dict[str, float], moa_info: DrugMoAInput) -> Dict[
         risk_model=state["risk_model"],
     )
     result["mode"] = state["mode"]
-    result["feature_importances"] = state["feature_importances"]
+    result["feature_importances"] = _visible_feature_importances(state)
     result["explanation_summary"] = build_explanation_summary(result["feature_deltas"], moa_info)
     result["demo_patient"] = state["demo_patient"]
     return result
