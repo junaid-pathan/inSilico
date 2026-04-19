@@ -28,5 +28,9 @@ export async function parseTrialPdf(file: File) {
     body: formData
   });
   if (!res.ok) throw new Error("Failed to parse trial pdf");
-  return res.json();
+  const data = await res.json();
+  if (data.error) {
+    throw new Error(data.detail || "Error parsing PDF");
+  }
+  return data;
 }
