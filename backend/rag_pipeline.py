@@ -11,7 +11,7 @@ import google.generativeai as genai
 from pypdf import PdfReader
 
 
-EMBEDDING_MODEL = "models/text-embedding-004"
+EMBEDDING_MODEL = "models/gemini-embedding-001"
 
 ENDPOINT_QUERIES: Dict[str, str] = {
     "hba1c": "HbA1c glycated hemoglobin reduction percentage points change from baseline primary endpoint",
