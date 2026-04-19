@@ -19,9 +19,7 @@ export function LandingFooter() {
             <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
               {[
                 { href: "/simulator", label: "Simulator" },
-                { href: "/insights", label: "Insights" },
                 { href: "/assistant", label: "Assistant" },
-                { href: "#", label: "IRB Consent" },
                 { href: "#", label: "Privacy" },
               ].map((l) => (
                 <li key={l.label}>

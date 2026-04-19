@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Play } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { GooeyText } from "@/components/ui/gooey-text-morphing"
 
@@ -54,17 +54,6 @@ export function LandingHero() {
             <Link href="/simulator">
               Launch Simulator
               <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </Button>
-          <Button
-            asChild
-            size="lg"
-            variant="outline"
-            className="border-white/20 bg-transparent text-foreground hover:bg-white/5"
-          >
-            <Link href="/insights">
-              <Play className="mr-1 h-4 w-4" />
-              View Insights
             </Link>
           </Button>
         </div>
