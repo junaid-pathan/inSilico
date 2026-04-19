@@ -6,10 +6,9 @@ import { SiteNav } from "@/components/site-nav"
 import { LandingFooter } from "@/components/landing/footer"
 import { PageHeader } from "@/components/data/page-header"
 import { MetricCard } from "@/components/data/metric-card"
-import { Button } from "@/components/ui/button"
 import FileUpload from "@/components/ui/file-upload"
 import {
-  PatientProfileForm,
+  PatientProfileWizard,
   patientPresets,
   type PatientProfile,
 } from "@/components/simulator/patient-profile-form"
@@ -37,6 +36,7 @@ export default function SimulatorPage() {
   const [moaData, setMoaData] = useState<any>(null);
   const [baselineScore, setBaselineScore] = useState<any>(null);
   const [requestError, setRequestError] = useState("");
+  const [isReadyForUpload, setIsReadyForUpload] = useState(false);
 
   const updatePatientField = (field: keyof PatientProfile, value: number) => {
     setPatient((current) => {
@@ -92,93 +92,71 @@ export default function SimulatorPage() {
     return (
       <main className="relative min-h-screen">
         <SiteNav />
-        <div className="mx-auto max-w-7xl px-4 py-24 lg:px-8">
+        <div className="mx-auto max-w-5xl px-4 py-24 lg:px-8">
           <div className="mx-auto mb-10 max-w-3xl text-center">
             <h1 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-widest text-glow">
-              Patient profile plus mechanism upload
+              Guided simulation intake
             </h1>
-            <p className="mt-4 text-sm text-muted-foreground md:text-base">
-              Enter the BRFSS-style patient fields first, then upload your mechanism of action
-              document so the simulation runs on the actual profile you provide.
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+              Answer the BRFSS-style patient questions one by one. After the review step, upload the
+              mechanism-of-action document to run the simulation on the profile you entered.
             </p>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[1.25fr_0.9fr]">
+          <div className="mx-auto max-w-3xl space-y-8">
             <section className="card-glass rounded-3xl p-6 md:p-8">
-              <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">
-                    / Patient input
-                  </p>
-                  <h2 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
-                    Baseline profile
-                  </h2>
-                  <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                    These fields match the backend simulation contract and replace the old hardcoded
-                    patient preset.
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBaselineScore}
-                  disabled={isLoading}
-                >
-                  Score baseline
-                </Button>
+              <div className="mb-6">
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">
+                  / Patient input
+                </p>
+                <h2 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
+                  Baseline profile
+                </h2>
+                  <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+                  These answers replace the old hardcoded patient preset and feed directly into the
+                  backend simulation.
+                </p>
               </div>
 
-              <PatientProfileForm
+              <PatientProfileWizard
                 patient={patient}
                 onChange={updatePatientField}
                 onLoadPreset={loadPatientPreset}
+                onScoreBaseline={handleBaselineScore}
+                baselineScore={baselineScore}
+                isLoading={isLoading}
+                error={requestError}
+                onReviewStepChange={setIsReadyForUpload}
               />
-
-              <div className="mt-6 flex flex-wrap items-center gap-3 text-sm">
-                {baselineScore ? (
-                  <p className="rounded-full border border-border/60 bg-background/20 px-4 py-2 text-muted-foreground">
-                    Baseline risk:{" "}
-                    <span className="font-semibold text-foreground">
-                      {(baselineScore.risk_score * 100).toFixed(1)}%
-                    </span>{" "}
-                    ({baselineScore.mode} mode)
-                  </p>
-                ) : (
-                  <p className="text-muted-foreground">
-                    Score the profile to preview baseline risk before uploading the document.
-                  </p>
-                )}
-                {requestError ? (
-                  <p className="text-sm text-[oklch(0.72_0.2_25)]">{requestError}</p>
-                ) : null}
-              </div>
             </section>
 
-            <section className="card-glass rounded-3xl p-6 md:p-8">
-              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent">
-                / Mechanism upload
-              </p>
-              <h2 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
-                Upload MoA document
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Once the PDF is parsed, TrialForge will simulate the intervention on the patient
-                profile entered on the left.
-              </p>
+            {isReadyForUpload ? (
+              <section className="card-glass rounded-3xl p-6 md:p-8">
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent">
+                  / Mechanism upload
+                </p>
+                <h2 className="font-display mt-2 text-2xl font-bold uppercase tracking-tight">
+                  Upload MoA document
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Final step. Once the PDF is parsed, TrialForge will run the intervention simulation
+                  on the patient profile you just reviewed.
+                </p>
 
-              <div className="mt-6">
-                {isLoading ? (
-                  <div className="flex min-h-[260px] flex-col items-center justify-center gap-4 text-primary">
-                    <Loader className="h-12 w-12 animate-spin" />
-                    <p className="text-center text-xl font-display uppercase tracking-widest text-glow">
-                      Running simulation...
-                    </p>
-                  </div>
-                ) : (
-                  <FileUpload onUploadComplete={handleUploadComplete} />
-                )}
-              </div>
-            </section>
+                <div className="mt-6">
+                  {isLoading ? (
+                    <div className="flex min-h-[260px] flex-col items-center justify-center gap-4 text-primary">
+                      <Loader className="h-12 w-12 animate-spin" />
+                      <p className="text-center text-xl font-display uppercase tracking-widest text-glow">
+                        Running simulation...
+                      </p>
+                    </div>
+                  ) : (
+                    <FileUpload onUploadComplete={handleUploadComplete} />
+                  )}
+                </div>
+              </section>
+            ) : null}
           </div>
         </div>
         <LandingFooter />
