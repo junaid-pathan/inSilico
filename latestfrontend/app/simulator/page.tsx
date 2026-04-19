@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/data/page-header"
 import { MetricCard } from "@/components/data/metric-card"
 import FileUpload from "@/components/ui/file-upload"
 import {
-  AdverseEventsChart,
   BaselineVsTwinChart,
   BiomarkerRadarChart,
   CohortPieChart,
@@ -90,7 +89,6 @@ export default function SimulatorPage() {
   // Map feature deltas
   const featureDeltas = simulationData.feature_deltas || [];
   const biomarkerRadar = simulationData.biomarker_radar || [];
-  const adverseEvents = simulationData.adverse_events || [];
   const cohortBreakdown = (simulationData.cohort_breakdown || []).map((entry: any) => ({
     ...entry,
     color: cohortColors[entry.name] || "var(--chart-3)",
@@ -278,37 +276,6 @@ export default function SimulatorPage() {
               </div>
             </section>
           </div>
-
-          {/* Adverse events */}
-          <section className="card-glass mt-6 rounded-3xl p-6">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-accent">
-                  / Safety
-                </p>
-                <h2 className="font-display mt-2 text-xl font-bold uppercase tracking-tight md:text-2xl">
-                  Simulated tolerability signals · 7d
-                </h2>
-              </div>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.76 0.14 190)" }} />
-                  Mild
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.78 0.16 95)" }} />
-                  Moderate
-                </span>
-                <span className="flex items-center gap-1.5 text-muted-foreground">
-                  <span className="h-2 w-2 rounded-full" style={{ background: "oklch(0.68 0.22 25)" }} />
-                  Severe
-                </span>
-              </div>
-            </div>
-            <div className="mt-6">
-              <AdverseEventsChart data={adverseEvents} />
-            </div>
-          </section>
 
           {/* Narrative panel */}
           <section className="card-glass relative mt-10 overflow-hidden rounded-3xl p-8 md:p-10">

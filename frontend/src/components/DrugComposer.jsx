@@ -144,7 +144,19 @@ export default function DrugComposer({ moa, onChange, onLoadDemo }) {
       }
       onLoadDemo(pickMoaFields(parsed));
       setLastParsed(parsed);
-      const modeLabel = parsed.mode === "pdf_formula" ? "formula" : "LLM guess";
+      const usedFormula = parsed.mode === "pdf_formula";
+      const modeLabel = usedFormula ? "formula" : "LLM guess";
+
+      console.log(
+        `%c[TrialForge] gamma ${Number(parsed.gamma ?? 0).toFixed(2)} via ${usedFormula ? "CALIBRATED FORMULA ✅" : "LLM GUESS (fallback) 🟡"}`,
+        `font-weight: bold; color: ${usedFormula ? "#166534" : "#92400e"}; font-size: 13px;`
+      );
+      if (!usedFormula) {
+        console.log("[TrialForge] fallback_reason:", parsed.fallback_reason);
+      }
+      console.log("[TrialForge] extracted endpoints:", parsed?.evidence?.endpoints_extracted);
+      console.log("[TrialForge] full parsed response:", parsed);
+
       setPdfStatus({
         state: "ok",
         message: `Extracted "${parsed.drug_name}" — gamma ${Number(parsed.gamma ?? 0).toFixed(2)} (${modeLabel})`,
