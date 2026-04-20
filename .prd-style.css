@@ -1,0 +1,54 @@
+@page {
+  size: A4;
+  margin: 28mm 25mm;
+}
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  color: #222;
+  font-size: 11pt;
+  line-height: 1.5;
+  max-width: none;
+}
+
+h1 {
+  font-size: 18pt;
+  font-weight: 700;
+  margin: 0 0 18px;
+  border: none;
+}
+
+h2 {
+  font-size: 12pt;
+  font-weight: 700;
+  margin-top: 18px;
+  margin-bottom: 4px;
+  page-break-after: avoid;
+}
+
+p {
+  margin: 6px 0 10px;
+}
+
+code {
+  font-family: "Courier New", monospace;
+  font-size: 10pt;
+}
+
+a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+strong {
+  font-weight: 700;
+}
+
+ul, ol {
+  margin: 4px 0 10px;
+  padding-left: 22px;
+}
+
+li {
+  margin: 2px 0;
+}
